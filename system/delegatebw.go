@@ -1,33 +1,33 @@
 package system
 
 import (
-	eos "github.com/eoscanada/eos-go"
+	potato "github.com/rise-worlds/potato-go"
 )
 
 // NewDelegateBW returns a `delegatebw` action that lives on the
-// `eosio.system` contract.
-func NewDelegateBW(from, receiver eos.AccountName, stakeCPU, stakeNet eos.Asset, transfer bool) *eos.Action {
-	return &eos.Action{
-		Account: AN("eosio"),
+// `poc.system` contract.
+func NewDelegateBW(from, receiver potato.AccountName, stakeCPU, stakeNet potato.Asset, transfer bool) *potato.Action {
+	return &potato.Action{
+		Account: AN("potato"),
 		Name:    ActN("delegatebw"),
-		Authorization: []eos.PermissionLevel{
+		Authorization: []potato.PermissionLevel{
 			{Actor: from, Permission: PN("active")},
 		},
-		ActionData: eos.NewActionData(DelegateBW{
+		ActionData: potato.NewActionData(DelegateBW{
 			From:     from,
 			Receiver: receiver,
 			StakeNet: stakeNet,
 			StakeCPU: stakeCPU,
-			Transfer: eos.Bool(transfer),
+			Transfer: potato.Bool(transfer),
 		}),
 	}
 }
 
-// DelegateBW represents the `eosio.system::delegatebw` action.
+// DelegateBW represents the `poc.system::delegatebw` action.
 type DelegateBW struct {
-	From     eos.AccountName `json:"from"`
-	Receiver eos.AccountName `json:"receiver"`
-	StakeNet eos.Asset       `json:"stake_net"`
-	StakeCPU eos.Asset       `json:"stake_cpu"`
-	Transfer eos.Bool        `json:"transfer"`
+	From     potato.AccountName `json:"from"`
+	Receiver potato.AccountName `json:"receiver"`
+	StakeNet potato.Asset       `json:"stake_net"`
+	StakeCPU potato.Asset       `json:"stake_cpu"`
+	Transfer potato.Bool        `json:"transfer"`
 }

@@ -1,18 +1,18 @@
 package forum
 
 import (
-	eos "github.com/eoscanada/eos-go"
+	potato "github.com/rise-worlds/potato-go"
 )
 
 // Status is an action to set a status update for a given account on the forum contract.
-func NewStatus(account eos.AccountName, content string) *eos.Action {
-	a := &eos.Action{
+func NewStatus(account potato.AccountName, content string) *potato.Action {
+	a := &potato.Action{
 		Account: ForumAN,
 		Name:    ActN("status"),
-		Authorization: []eos.PermissionLevel{
-			{Actor: account, Permission: eos.PermissionName("active")},
+		Authorization: []potato.PermissionLevel{
+			{Actor: account, Permission: potato.PermissionName("active")},
 		},
-		ActionData: eos.NewActionData(Status{
+		ActionData: potato.NewActionData(Status{
 			Account: account,
 			Content: content,
 		}),
@@ -20,8 +20,8 @@ func NewStatus(account eos.AccountName, content string) *eos.Action {
 	return a
 }
 
-// Status represents the `eosio.forum::status` action.
+// Status represents the `poc.forum::status` action.
 type Status struct {
-	Account eos.AccountName `json:"account_name"`
+	Account potato.AccountName `json:"account_name"`
 	Content string          `json:"content"`
 }

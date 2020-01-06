@@ -1,4 +1,4 @@
-package eos
+package potato
 
 import (
 	"bytes"
@@ -8,8 +8,8 @@ import (
 	"reflect"
 )
 
-// See: libraries/chain/include/eosio/chain/contracts/types.hpp:203
-// See: build/contracts/eosio.system/eosio.system.abi
+// See: libraries/chain/include/potato/chain/contracts/types.hpp:203
+// See: build/contracts/potato.system/potato.system.abi
 
 // SetCode represents the hard-coded `setcode` action.
 type SetCode struct {
@@ -52,7 +52,7 @@ func (a Action) Digest() Checksum256 {
 
 type ActionData struct {
 	HexData  HexBytes    `json:"hex_data,omitempty"`
-	Data     interface{} `json:"data,omitempty" eos:"-"`
+	Data     interface{} `json:"data,omitempty" potato:"-"`
 	abi      []byte      // TBD: we could use the ABI to decode in obj
 	toServer bool
 }
@@ -79,7 +79,7 @@ func (a *ActionData) SetToServer(toServer bool) {
 	a.toServer = toServer
 }
 
-//  jsonActionToServer represents what /v1/chain/push_transaction
+//  jsonActionToServer represents what /potato/chain/push_transaction
 //  expects, which isn't allllways the same everywhere.
 type jsonActionToServer struct {
 	Account       AccountName       `json:"account"`
@@ -97,6 +97,10 @@ type jsonActionFromServer struct {
 }
 
 func (a *Action) MarshalJSON() ([]byte, error) {
+	auths := a.Authorization
+	if auths == nil {
+		auths = make([]PermissionLevel, 0)
+	}
 	if a.toServer {
 		data, err := a.ActionData.EncodeActionData()
 		if err != nil {
@@ -106,7 +110,7 @@ func (a *Action) MarshalJSON() ([]byte, error) {
 		return json.Marshal(&jsonActionToServer{
 			Account:       a.Account,
 			Name:          a.Name,
-			Authorization: a.Authorization,
+			Authorization: auths,
 			Data:          data,
 		})
 	}
@@ -114,7 +118,7 @@ func (a *Action) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&jsonActionFromServer{
 		Account:       a.Account,
 		Name:          a.Name,
-		Authorization: a.Authorization,
+		Authorization: auths,
 		HexData:       a.HexData,
 		Data:          a.Data,
 	})

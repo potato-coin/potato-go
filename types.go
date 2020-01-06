@@ -1,18 +1,23 @@
-package eos
+package potato
 
 import (
+	"encoding/base64"
 	"encoding/binary"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/eoscanada/eos-go/ecc"
+	"github.com/rise-worlds/potato-go/ecc"
 )
+
+var symbolRegex = regexp.MustCompile("^[0-9],[A-Z]{1,7}$")
+var symbolCodeRegex = regexp.MustCompile("^[A-Z]{1,7}$")
 
 // For reference:
 // https://github.com/mithrilcoin-io/EosCommander/blob/master/app/src/main/java/io/mithrilcoin/eoscommander/data/remote/model/types/EosByteWriter.java
@@ -88,19 +93,60 @@ func (c CompressionType) MarshalJSON() ([]byte, error) {
 }
 
 func (c *CompressionType) UnmarshalJSON(data []byte) error {
-	var s string
-	err := json.Unmarshal(data, &s)
-	if err != nil {
+	tryNext, err := c.tryUnmarshalJSONAsString(data)
+	if err != nil && !tryNext {
 		return err
 	}
 
+	if tryNext {
+		_, err := c.tryUnmarshalJSONAsUint8(data)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (c *CompressionType) tryUnmarshalJSONAsString(data []byte) (tryNext bool, err error) {
+	var s string
+	err = json.Unmarshal(data, &s)
+	if err != nil {
+		_, isTypeError := err.(*json.UnmarshalTypeError)
+
+		// Let's continue with next handler is we hit a type error, might be an integer...
+		return isTypeError, err
+	}
+
 	switch s {
+	case "none":
+		*c = CompressionNone
 	case "zlib":
 		*c = CompressionZlib
 	default:
-		*c = CompressionNone
+		return false, fmt.Errorf("unknown compression type %s", s)
 	}
-	return nil
+
+	return false, nil
+}
+
+func (c *CompressionType) tryUnmarshalJSONAsUint8(data []byte) (tryNext bool, err error) {
+	var s uint8
+	err = json.Unmarshal(data, &s)
+	if err != nil {
+		return false, err
+	}
+
+	switch s {
+	case 0:
+		*c = CompressionNone
+	case 1:
+		*c = CompressionZlib
+	default:
+		return false, fmt.Errorf("unknown compression type %d", s)
+	}
+
+	return false, nil
 }
 
 // CurrencyName
@@ -130,7 +176,7 @@ func (b *Bool) UnmarshalJSON(data []byte) error {
 
 // NOTE: there's also ExtendedAsset which is a quantity with the attached contract (AccountName)
 type Asset struct {
-	Amount int64
+	Amount Int64
 	Symbol
 }
 
@@ -181,75 +227,255 @@ type ExtendedAsset struct {
 type Symbol struct {
 	Precision uint8
 	Symbol    string
+
+	// Caching of symbol code if it was computed once
+	symbolCode uint64
+}
+
+func NewSymbolFromUint64(value uint64) (out Symbol) {
+	out.Precision = uint8(value & 0xFF)
+	out.symbolCode = value >> 8
+	out.Symbol = SymbolCode(out.symbolCode).String()
+
+	return
+}
+
+func StringToSymbol(str string) (Symbol, error) {
+	symbol := Symbol{}
+	if !symbolRegex.MatchString(str) {
+		return symbol, fmt.Errorf("%s is not a valid symbol", str)
+	}
+
+	precision, _ := strconv.ParseUint(string(str[0]), 10, 8)
+
+	symbol.Precision = uint8(precision)
+	symbol.Symbol = str[2:]
+
+	return symbol, nil
+}
+
+func MustStringToSymbol(str string) Symbol {
+	symbol, err := StringToSymbol(str)
+	if err != nil {
+		panic("invalid symbol " + str)
+	}
+
+	return symbol
+}
+
+func (s Symbol) SymbolCode() (SymbolCode, error) {
+	if s.symbolCode != 0 {
+		return SymbolCode(s.symbolCode), nil
+	}
+
+	symbolCode, err := StringToSymbolCode(s.Symbol)
+	if err != nil {
+		return 0, err
+	}
+
+	return SymbolCode(symbolCode), nil
+}
+
+func (s Symbol) MustSymbolCode() SymbolCode {
+	symbolCode, err := StringToSymbolCode(s.Symbol)
+	if err != nil {
+		panic("invalid symbol code " + s.Symbol)
+	}
+
+	return symbolCode
+}
+
+func (s Symbol) ToUint64() (uint64, error) {
+	symbolCode, err := s.SymbolCode()
+	if err != nil {
+		return 0, fmt.Errorf("symbol %s is not a valid symbol code: %s", s.Symbol, err)
+	}
+
+	return uint64(symbolCode)<<8 | uint64(s.Precision), nil
+}
+
+func (s Symbol) String() string {
+	return fmt.Sprintf("%d,%s", s.Precision, s.Symbol)
 }
 
 type SymbolCode uint64
 
-// EOSSymbol represents the standard EOS symbol on the chain.  It's
-// here just to speed up things.
-var EOSSymbol = Symbol{Precision: 4, Symbol: "EOS"}
-
-func NewEOSAssetFromString(amount string) (out Asset, err error) {
-	if len(amount) == 0 {
-		return out, fmt.Errorf("cannot be an empty string")
+func StringToSymbolCode(str string) (SymbolCode, error) {
+	if len(str) > 7 {
+		return 0, fmt.Errorf("string is too long to be a valid symbol_code")
 	}
 
-	if strings.Contains(amount, " EOS") {
-		amount = strings.Replace(amount, " EOS", "", 1)
-	}
-	if !strings.Contains(amount, ".") {
-		val, err := strconv.ParseInt(amount, 10, 64)
-		if err != nil {
-			return out, err
+	var symbolCode uint64
+	for i := len(str) - 1; i >= 0; i-- {
+		if str[i] < 'A' || str[i] > 'Z' {
+			return 0, fmt.Errorf("only uppercase letters allowed in symbol_code string")
 		}
-		return NewEOSAsset(val * 10000), nil
+
+		symbolCode <<= 8
+		symbolCode = symbolCode | uint64(str[i])
 	}
 
-	parts := strings.Split(amount, ".")
-	if len(parts) != 2 {
-		return out, fmt.Errorf("cannot have two . in amount")
+	return SymbolCode(symbolCode), nil
+}
+
+func (sc SymbolCode) String() string {
+	builder := strings.Builder{}
+
+	symbolCode := uint64(sc)
+	for i := 0; i < 7; i++ {
+		if symbolCode == 0 {
+			return builder.String()
+		}
+
+		builder.WriteByte(byte(symbolCode & 0xFF))
+		symbolCode >>= 8
 	}
 
-	if len(parts[1]) > 4 {
-		return out, fmt.Errorf("EOS has only 4 decimals")
-	}
+	return builder.String()
+}
 
-	val, err := strconv.ParseInt(strings.Replace(amount, ".", "", 1), 10, 64)
+func (sc SymbolCode) MarshalJSON() (data []byte, err error) {
+	return []byte(`"` + sc.String() + `"`), nil
+}
+
+// POCSymbol represents the standard POC symbol on the chain.  It's
+// here just to speed up things.
+var POCSymbol = Symbol{Precision: 4, Symbol: "POC"}
+
+// REXSymbol represents the standard REX symbol on the chain.  It's
+// here just to speed up things.
+var REXSymbol = Symbol{Precision: 4, Symbol: "REX"}
+
+func NewPOCAsset(amount int64) Asset {
+	return Asset{Amount: Int64(amount), Symbol: POCSymbol}
+}
+
+// NewAsset reads from a string an POC asset.
+//
+// Deprecated: Use `NewAssetFromString` instead
+func NewAsset(in string) (out Asset, err error) {
+	return NewAssetFromString(in)
+}
+
+// NewAssetFromString reads a string an decode it to an poc.Asset
+// structure if possible. The input must contains an amount and
+// a symbol. The precision is inferred based on the actual number
+// of decimals present.
+func NewAssetFromString(in string) (out Asset, err error) {
+	out, err = newAssetFromString(in)
 	if err != nil {
 		return out, err
 	}
-	return NewEOSAsset(val * int64(math.Pow10(4-len(parts[1])))), nil
-}
 
-func NewEOSAsset(amount int64) Asset {
-	return Asset{Amount: amount, Symbol: EOSSymbol}
-}
-
-// NewAsset parses a string like `1000.0000 EOS` into a properly setup Asset
-func NewAsset(in string) (out Asset, err error) {
-	sec := strings.SplitN(in, " ", 2)
-	if len(sec) != 2 {
+	if out.Symbol.Symbol == "" {
 		return out, fmt.Errorf("invalid format %q, expected an amount and a currency symbol", in)
 	}
 
-	if len(sec[1]) > 7 {
-		return out, fmt.Errorf("currency symbol %q too long", sec[1])
-	}
+	return
+}
 
-	out.Symbol.Symbol = sec[1]
-	amount := sec[0]
-	amountSec := strings.SplitN(amount, ".", 2)
+func NewPOCAssetFromString(input string) (Asset, error) {
+	return NewFixedSymbolAssetFromString(POCSymbol, input)
+}
 
-	if len(amountSec) == 2 {
-		out.Symbol.Precision = uint8(len(amountSec[1]))
-	}
+func NewREXAssetFromString(input string) (Asset, error) {
+	return NewFixedSymbolAssetFromString(REXSymbol, input)
+}
 
-	val, err := strconv.ParseInt(strings.Replace(amount, ".", "", 1), 10, 64)
+func NewFixedSymbolAssetFromString(symbol Symbol, input string) (out Asset, err error) {
+	integralPart, decimalPart, symbolPart, err := splitAsset(input)
 	if err != nil {
 		return out, err
 	}
 
-	out.Amount = val
+	symbolCode := symbol.MustSymbolCode().String()
+	precision := symbol.Precision
+
+	if len(decimalPart) > int(precision) {
+		return out, fmt.Errorf("symbol %s precision mismatch: expected %d, got %d", symbol, precision, len(decimalPart))
+	}
+
+	if symbolPart != "" && symbolPart != symbolCode {
+		return out, fmt.Errorf("symbol %s code mismatch: expected %s, got %s", symbol, symbolCode, symbolPart)
+	}
+
+	if len(decimalPart) < int(precision) {
+		decimalPart += strings.Repeat("0", int(precision)-len(decimalPart))
+	}
+
+	val, err := strconv.ParseInt(integralPart+decimalPart, 10, 64)
+	if err != nil {
+		return out, err
+	}
+
+	return Asset{
+		Amount: Int64(val),
+		Symbol: Symbol{Precision: precision, Symbol: symbolCode},
+	}, nil
+}
+
+func newAssetFromString(in string) (out Asset, err error) {
+	integralPart, decimalPart, symbolPart, err := splitAsset(in)
+	if err != nil {
+		return out, err
+	}
+
+	val, err := strconv.ParseInt(integralPart+decimalPart, 10, 64)
+	if err != nil {
+		return out, err
+	}
+
+	out.Amount = Int64(val)
+	out.Symbol.Precision = uint8(len(decimalPart))
+	out.Symbol.Symbol = symbolPart
+
+	return
+}
+
+func splitAsset(input string) (integralPart, decimalPart, symbolPart string, err error) {
+	input = strings.Trim(input, " ")
+	if len(input) == 0 {
+		return "", "", "", fmt.Errorf("input cannot be empty")
+	}
+
+	parts := strings.Split(input, " ")
+	if len(parts) >= 1 {
+		integralPart, decimalPart, err = splitAssetAmount(parts[0])
+		if err != nil {
+			return
+		}
+	}
+
+	if len(parts) == 2 {
+		symbolPart = parts[1]
+		if len(symbolPart) > 7 {
+			return "", "", "", fmt.Errorf("invalid asset %q, symbol should have less than 7 characters", input)
+		}
+	}
+
+	if len(parts) > 2 {
+		return "", "", "", fmt.Errorf("invalid asset %q, expecting an amount alone or an amount and a currency symbol", input)
+	}
+
+	return
+}
+
+func splitAssetAmount(input string) (integralPart, decimalPart string, err error) {
+	parts := strings.Split(input, ".")
+	switch len(parts) {
+	case 1:
+		integralPart = parts[0]
+	case 2:
+		integralPart = parts[0]
+		decimalPart = parts[1]
+
+		if len(decimalPart) > math.MaxUint8 {
+			err = fmt.Errorf("invalid asset amount precision %q, should have less than %d characters", input, math.MaxUint8)
+
+		}
+	default:
+		return "", "", fmt.Errorf("invalid asset amount %q, expected amount to have at most a single dot", input)
+	}
 
 	return
 }
@@ -532,10 +758,14 @@ type BlockTimestamp struct {
 	time.Time
 }
 
-const BlockTimestampFormat = "2006-01-02T15:04:05"
+const BlockTimestampFormat = "2006-01-02T15:04:05.999"
 
 func (t BlockTimestamp) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf("%q", t.Format(BlockTimestampFormat))), nil
+	strTime := t.Format(BlockTimestampFormat)
+	if len(strTime) == len("2006-01-02T15:04:05.5") {
+		strTime += "00"
+	}
+	return []byte(fmt.Sprintf("%q", strTime)), nil
 }
 
 func (t *BlockTimestamp) UnmarshalJSON(data []byte) (err error) {
@@ -796,4 +1026,20 @@ func (i *Uint128) UnmarshalJSON(data []byte) error {
 	i.Hi = hiUint
 
 	return nil
+}
+
+// Blob
+
+// Blob is base64 encoded data
+// https://github.com/potato/fc/blob/0e74738e938c2fe0f36c5238dbc549665ddaef82/include/fc/variant.hpp#L47
+type Blob string
+
+// Data returns decoded base64 data
+func (b Blob) Data() ([]byte, error) {
+	return base64.StdEncoding.DecodeString(string(b))
+}
+
+// String returns the blob as a string
+func (b Blob) String() string {
+	return string(b)
 }

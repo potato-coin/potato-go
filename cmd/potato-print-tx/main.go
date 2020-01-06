@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/davecgh/go-spew/spew"
-	"github.com/eoscanada/eos-go"
+	"github.com/rise-worlds/potato-go"
 )
 
 func main() {
@@ -23,8 +23,8 @@ func main() {
 		log.Fatalln("error decoding hex:", err)
 	}
 
-	var tx *eos.Transaction
-	err = eos.UnmarshalBinary(b, &tx)
+	var tx *potato.Transaction
+	err = potato.UnmarshalBinary(b, &tx)
 	if err != nil {
 		log.Fatalln("error decoding:", err)
 	}

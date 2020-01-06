@@ -1,1 +1,1 @@
-package eos
+package potato

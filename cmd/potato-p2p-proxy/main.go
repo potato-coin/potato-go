@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/eoscanada/eos-go/p2p"
+	"github.com/rise-worlds/potato-go/p2p"
 )
 
 var peer1 = flag.String("peer1", "localhost:9876", "peer 1")
@@ -30,20 +30,20 @@ func main() {
 	}
 
 	proxy := p2p.NewProxy(
-		p2p.NewOutgoingPeer(*peer1, "eos-proxy", nil),
-		p2p.NewOutgoingPeer(*peer2, "eos-proxy", &p2p.HandshakeInfo{
+		p2p.NewOutgoingPeer(*peer1, "potato-proxy", nil),
+		p2p.NewOutgoingPeer(*peer2, "potato-proxy", &p2p.HandshakeInfo{
 			ChainID: cID,
 		}),
 	)
 
 	//proxy := p2p.NewProxy(
-	//	p2p.NewOutgoingPeer("localhost:9876", chainID, "eos-proxy", false),
-	//	p2p.NewIncommingPeer("localhost:1111", chainID, "eos-proxy"),
+	//	p2p.NewOutgoingPeer("localhost:9876", chainID, "potato-proxy", false),
+	//	p2p.NewIncommingPeer("localhost:1111", chainID, "potato-proxy"),
 	//)
 
 	//proxy := p2p.NewProxy(
-	//	p2p.NewIncommingPeer("localhost:2222", "eos-proxy"),
-	//	p2p.NewIncommingPeer("localhost:1111", "eos-proxy"),
+	//	p2p.NewIncommingPeer("localhost:2222", "potato-proxy"),
+	//	p2p.NewIncommingPeer("localhost:1111", "potato-proxy"),
 	//)
 
 	proxy.RegisterHandler(p2p.StringLoggerHandler)

@@ -1,4 +1,4 @@
-package eos
+package potato
 
 import (
 	"crypto/sha256"
@@ -10,7 +10,7 @@ import (
 
 	"strings"
 
-	"github.com/eoscanada/eos-go/ecc"
+	"github.com/rise-worlds/potato-go/ecc"
 )
 
 type Signer interface {
@@ -25,7 +25,7 @@ type Signer interface {
 	ImportPrivateKey(wifPrivKey string) error
 }
 
-// `eosiowd` wallet-based signer
+// `potatowd` wallet-based signer
 type WalletSigner struct {
 	api        *API
 	walletName string

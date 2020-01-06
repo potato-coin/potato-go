@@ -1,7 +1,7 @@
 btcd
 ====
 
-WARNING: this is a stripped down of `btcd`, for the sole purpose or re-usings its cryptographic primitives.  They have been slightly modified to fit the EOS blockchain.
+WARNING: this is a stripped down of `btcd`, for the sole purpose or re-usings its cryptographic primitives.  They have been slightly modified to fit the Potato blockchain.
 
 
 

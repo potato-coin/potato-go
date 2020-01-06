@@ -1,20 +1,23 @@
 package system
 
-import "github.com/eoscanada/eos-go"
+import "github.com/rise-worlds/potato-go"
 
-// NewUnlinkAuth creates an action from the `eosio.system` contract
+// NewUnlinkAuth creates an action from the `poc.system` contract
 // called `unlinkauth`.
 //
 // `unlinkauth` detaches a previously set permission from a
 // `code::actionName`. See `linkauth`.
-func NewUnlinkAuth(account, code eos.AccountName, actionName eos.ActionName) *eos.Action {
-	a := &eos.Action{
-		Account: AN("eosio"),
+func NewUnlinkAuth(account, code potato.AccountName, actionName potato.ActionName) *potato.Action {
+	a := &potato.Action{
+		Account: AN("potato"),
 		Name:    ActN("unlinkauth"),
-		Authorization: []eos.PermissionLevel{
-			{account, eos.PermissionName("active")},
+		Authorization: []potato.PermissionLevel{
+			{
+				Actor:      account,
+				Permission: potato.PermissionName("active"),
+			},
 		},
-		ActionData: eos.NewActionData(UnlinkAuth{
+		ActionData: potato.NewActionData(UnlinkAuth{
 			Account: account,
 			Code:    code,
 			Type:    actionName,
@@ -27,7 +30,7 @@ func NewUnlinkAuth(account, code eos.AccountName, actionName eos.ActionName) *eo
 // UnlinkAuth represents the native `unlinkauth` action, through the
 // system contract.
 type UnlinkAuth struct {
-	Account eos.AccountName `json:"account"`
-	Code    eos.AccountName `json:"code"`
-	Type    eos.ActionName  `json:"type"`
+	Account potato.AccountName `json:"account"`
+	Code    potato.AccountName `json:"code"`
+	Type    potato.ActionName  `json:"type"`
 }

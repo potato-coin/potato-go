@@ -1,4 +1,4 @@
-package eos
+package potato
 
 import (
 	"encoding/binary"
@@ -11,7 +11,7 @@ import (
 
 // Work-in-progress p2p comms implementation
 //
-// See /home/abourget/build/eos3/plugins/net_plugin/include/eosio/net_plugin/protocol.hpp:219
+// See /home/abourget/build/eos3/plugins/net_plugin/include/potato/net_plugin/protocol.hpp:219
 //
 
 type P2PMessageType byte
@@ -87,7 +87,7 @@ type Packet struct {
 	Length     uint32         `json:"length"`
 	Type       P2PMessageType `json:"type"`
 	Payload    []byte         `json:"-"`
-	P2PMessage P2PMessage     `json:"message" eos:"-"`
+	P2PMessage P2PMessage     `json:"message" poc:"-"`
 	Raw        []byte         `json:"-"`
 }
 

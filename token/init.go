@@ -1,9 +1,9 @@
 package token
 
-import "github.com/eoscanada/eos-go"
+import "github.com/rise-worlds/potato-go"
 
 func init() {
-	eos.RegisterAction(AN("eosio.token"), ActN("transfer"), Transfer{})
-	eos.RegisterAction(AN("eosio.token"), ActN("issue"), Issue{})
-	eos.RegisterAction(AN("eosio.token"), ActN("create"), Create{})
+	potato.RegisterAction(AN("poc.token"), ActN("transfer"), Transfer{})
+	potato.RegisterAction(AN("poc.token"), ActN("issue"), Issue{})
+	potato.RegisterAction(AN("poc.token"), ActN("create"), Create{})
 }

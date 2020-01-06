@@ -1,7 +1,10 @@
-package eos
+package potato
 
 import (
-	"github.com/eoscanada/eos-go/eoserr"
+	"fmt"
+	"strings"
+
+	potatoerr "github.com/rise-worlds/potato-go/potatoerr"
 )
 
 // APIError represents the errors as reported by the server
@@ -16,7 +19,7 @@ type APIError struct {
 	} `json:"error"`
 }
 
-func NewAPIError(httpCode int, msg string, e eoserr.Error) *APIError {
+func NewAPIError(httpCode int, msg string, e potatoerr.Error) *APIError {
 	newError := &APIError{
 		Code:    httpCode,
 		Message: msg,
@@ -44,5 +47,55 @@ type APIErrorDetail struct {
 }
 
 func (e APIError) Error() string {
-	return e.Message
+	msg := e.Message
+	msg = fmt.Sprintf("%s: %s", msg, e.ErrorStruct.What)
+
+	for _, detail := range e.ErrorStruct.Details {
+		msg = fmt.Sprintf("%s: %s", msg, detail.Message)
+	}
+
+	return msg
+}
+
+// IsUnknowKeyError determines if the APIError is a 500 error
+// with an `unknown key` message in at least one of the detail element.
+// Some endpoint like `/v1/chain/get_account` returns a body in
+// the form:
+//
+// ```
+//  {
+//  	"code": 500,
+//  	"message": "Internal Service Error",
+//  	"error": {
+//  		"code": 0,
+//  		"name": "exception",
+//  		"what": "unspecified",
+//  		"details": [
+//		 		{
+//		 			"message": "unknown key (<... redacted ...>): (0 poc.rex)",
+//		 			"file": "http_plugin.cpp",
+//		 			"line_number": 589,
+//		 			"method": "handle_exception"
+//		 		}
+//  		]
+//  	}
+//  }
+// ```
+//
+// This will check if root code is a 500, that inner error code is 0 and there is
+// a detail message starting with prefix `"unknown key"`.
+func (e APIError) IsUnknownKeyError() bool {
+	return e.Code == 500 &&
+		e.ErrorStruct.Code == 0 &&
+		e.hasDetailMessagePrefix("unknown key")
+}
+
+func (e APIError) hasDetailMessagePrefix(prefix string) bool {
+	for _, detail := range e.ErrorStruct.Details {
+		if strings.HasPrefix(detail.Message, prefix) {
+			return true
+		}
+	}
+
+	return false
 }

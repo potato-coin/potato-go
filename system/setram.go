@@ -1,17 +1,20 @@
 package system
 
 import (
-	eos "github.com/eoscanada/eos-go"
+	potato "github.com/rise-worlds/potato-go"
 )
 
-func NewSetRAM(maxRAMSize uint64) *eos.Action {
-	a := &eos.Action{
-		Account: AN("eosio"),
+func NewSetRAM(maxRAMSize uint64) *potato.Action {
+	a := &potato.Action{
+		Account: AN("potato"),
 		Name:    ActN("setram"),
-		Authorization: []eos.PermissionLevel{
-			{AN("eosio"), eos.PermissionName("active")},
+		Authorization: []potato.PermissionLevel{
+			{
+				Actor:      AN("potato"),
+				Permission: potato.PermissionName("active"),
+			},
 		},
-		ActionData: eos.NewActionData(SetRAM{
+		ActionData: potato.NewActionData(SetRAM{
 			MaxRAMSize: maxRAMSize,
 		}),
 	}
@@ -20,5 +23,5 @@ func NewSetRAM(maxRAMSize uint64) *eos.Action {
 
 // SetRAM represents the hard-coded `setram` action.
 type SetRAM struct {
-	MaxRAMSize uint64 `json:"max_ram_size"`
+	MaxRAMSize potato.Uint64 `json:"max_ram_size"`
 }

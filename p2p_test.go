@@ -1,4 +1,4 @@
-package eos
+package potato
 
 import (
 	"bytes"

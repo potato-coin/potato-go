@@ -1,19 +1,19 @@
 package forum
 
 import (
-	eos "github.com/eoscanada/eos-go"
+	potato "github.com/rise-worlds/potato-go"
 )
 
 // NewVote is an action representing a simple vote to be broadcast
 // through the chain network.
-func NewVote(voter eos.AccountName, proposalName eos.Name, voteValue uint8, voteJSON string) *eos.Action {
-	a := &eos.Action{
+func NewVote(voter potato.AccountName, proposalName potato.Name, voteValue uint8, voteJSON string) *potato.Action {
+	a := &potato.Action{
 		Account: ForumAN,
 		Name:    ActN("vote"),
-		Authorization: []eos.PermissionLevel{
-			{Actor: voter, Permission: eos.PermissionName("active")},
+		Authorization: []potato.PermissionLevel{
+			{Actor: voter, Permission: potato.PermissionName("active")},
 		},
-		ActionData: eos.NewActionData(Vote{
+		ActionData: potato.NewActionData(Vote{
 			Voter:        voter,
 			ProposalName: proposalName,
 			Vote:         voteValue,
@@ -23,10 +23,10 @@ func NewVote(voter eos.AccountName, proposalName eos.Name, voteValue uint8, vote
 	return a
 }
 
-// Vote represents the `eosio.forum::vote` action.
+// Vote represents the `poc.forum::vote` action.
 type Vote struct {
-	Voter        eos.AccountName `json:"voter"`
-	ProposalName eos.Name        `json:"proposal_name"`
+	Voter        potato.AccountName `json:"voter"`
+	ProposalName potato.Name        `json:"proposal_name"`
 	Vote         uint8           `json:"vote"`
 	VoteJSON     string          `json:"vote_json"`
 }

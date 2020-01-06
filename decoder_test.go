@@ -1,4 +1,4 @@
-package eos
+package potato
 
 import (
 	"encoding/binary"
@@ -9,10 +9,9 @@ import (
 
 	"time"
 
-	"fmt"
-
-	"github.com/eoscanada/eos-go/ecc"
+	"github.com/rise-worlds/potato-go/ecc"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDecoder_Remaining(t *testing.T) {
@@ -255,7 +254,7 @@ func TestDecoder_Empty_Checksum256(t *testing.T) {
 
 func TestDecoder_PublicKey(t *testing.T) {
 
-	pk := ecc.MustNewPublicKey("EOS1111111111111111111111111111111114T1Anm")
+	pk := ecc.MustNewPublicKey("POC1111111111111111111111111111111114T1Anm")
 
 	buf := new(bytes.Buffer)
 	enc := NewEncoder(buf)
@@ -296,8 +295,8 @@ func TestDecoder_PublicKey_R1(t *testing.T) {
 	d := NewDecoder(buf.Bytes())
 
 	rpk, err := d.ReadPublicKey()
-	fmt.Printf("Key %s\n", rpk.String())
-	assert.NoError(t, err)
+
+	require.NoError(t, err)
 
 	assert.Equal(t, pk, rpk)
 	assert.Equal(t, 0, d.remaining())
@@ -356,14 +355,18 @@ func TestDecoder_Tstamp(t *testing.T) {
 }
 
 func TestDecoder_BlockTimestamp(t *testing.T) {
-
+	// Represents block timestamp at slot 1, which is 500 millisecons pass
+	// the block epoch which is
 	ts := BlockTimestamp{
-		time.Unix(time.Now().Unix(), 0),
+		time.Unix(0, 500*1000*1000+946684800000*1000*1000),
 	}
 
 	buf := new(bytes.Buffer)
 	enc := NewEncoder(buf)
 	enc.writeBlockTimestamp(ts)
+
+	// This represents slot 1 in big endian uint32 encoding
+	assert.Equal(t, "01000000", hex.EncodeToString(buf.Bytes()))
 
 	d := NewDecoder(buf.Bytes())
 
@@ -371,16 +374,6 @@ func TestDecoder_BlockTimestamp(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, ts, rbt)
 	assert.Equal(t, 0, d.remaining())
-}
-
-func TestDecoder_Time(t *testing.T) {
-	time := time.Now()
-
-	buf := new(bytes.Buffer)
-	enc := NewEncoder(buf)
-	enc.Encode(&time)
-
-	fmt.Println(buf.Bytes())
 }
 
 type EncodeTestStruct struct {
@@ -421,7 +414,7 @@ func TestDecoder_Encode(t *testing.T) {
 		F7: [2]string{"foo", "bar"},
 		// maps don't serialize deterministically.. we no want that.
 		//		F8:  map[string]string{"foo": "bar", "hello": "you"},
-		F9:  ecc.MustNewPublicKey("EOS1111111111111111111111111111111114T1Anm"),
+		F9:  ecc.MustNewPublicKey("POC1111111111111111111111111111111114T1Anm"),
 		F10: ecc.Signature{Curve: ecc.CurveK1, Content: make([]byte, 65)},
 		F11: byte(1),
 		F12: uint64(87),
@@ -430,14 +423,14 @@ func TestDecoder_Encode(t *testing.T) {
 		F15: blockts,
 		F16: Varuint32(999),
 		F17: true,
-		F18: NewEOSAsset(100000),
+		F18: NewPOCAsset(100000),
 	}
 
 	buf := new(bytes.Buffer)
 	enc := NewEncoder(buf)
 	assert.NoError(t, enc.Encode(s))
 
-	assert.Equal(t, "03616263b5ff6300e7030000000000000000000000000000000000000000000000000000000000000000000002036465660337383903666f6f036261720000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001570000000000000005010203040504ae0f517acd57150b973d23e70701a08601000000000004454f5300000000", hex.EncodeToString(buf.Bytes()))
+	assert.Equal(t, "03616263b5ff6300e7030000000000000000000000000000000000000000000000000000000000000000000002036465660337383903666f6f036261720000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001570000000000000005010203040504ae0f517acd5715162e7b46e70701a08601000000000004454f5300000000", hex.EncodeToString(buf.Bytes()))
 
 	decoder := NewDecoder(buf.Bytes())
 	assert.NoError(t, decoder.Decode(s))
@@ -459,9 +452,9 @@ func TestDecoder_Encode(t *testing.T) {
 	assert.Equal(t, blockts, s.F15)
 	assert.Equal(t, Varuint32(999), s.F16)
 	assert.Equal(t, true, s.F17)
-	assert.Equal(t, int64(100000), s.F18.Amount)
+	assert.Equal(t, Int64(100000), s.F18.Amount)
 	assert.Equal(t, uint8(4), s.F18.Precision)
-	assert.Equal(t, "EOS", s.F18.Symbol.Symbol)
+	assert.Equal(t, "POC", s.F18.Symbol.Symbol)
 
 }
 
@@ -571,7 +564,7 @@ func TestEncoder_Encode_struct_error(t *testing.T) {
 }
 
 type TagTestStruct struct {
-	S1 string `eos:"-"`
+	S1 string `poc:"-"`
 	S2 string
 }
 
@@ -607,6 +600,52 @@ func TestEncoder_Encode_struct_tag(t *testing.T) {
 
 }
 
+func TestDecoder_Decode_struct_tag_BinaryExtension(t *testing.T) {
+	type BinaryExtensionTestStruct struct {
+		S2 string
+		S1 string `poc:"binary_extension"`
+	}
+
+	var s BinaryExtensionTestStruct
+	err := UnmarshalBinary([]byte{0x3, 0x61, 0x62, 0x63}, &s)
+	require.NoError(t, err)
+
+	assert.Equal(t, "", s.S1)
+	assert.Equal(t, "abc", s.S2)
+
+	err = UnmarshalBinary([]byte{0x3, 0x61, 0x62, 0x63, 0x3, 0x31, 0x32, 0x33}, &s)
+	require.NoError(t, err)
+
+	assert.Equal(t, "123", s.S1)
+	assert.Equal(t, "abc", s.S2)
+}
+
+func TestDecoder_Decode_struct_tag_BinaryExtension_NotGrouped(t *testing.T) {
+	type BinaryExtensionTestStruct struct {
+		S1 string
+		S2 string `poc:"binary_extension"`
+		S3 string
+	}
+
+	require.PanicsWithValue(t, "the `poc: \"binary_extension\"` tags must be packed together at the end of struct fields, problematic field S3", func() {
+		var s BinaryExtensionTestStruct
+		UnmarshalBinary([]byte{0x1, 0x61, 0x01, 0x62, 0x01, 0x63}, &s)
+	})
+}
+
+func TestDecoder_Decode_struct_tag_BinaryExtension_AllAtStart(t *testing.T) {
+	type BinaryExtensionTestStruct struct {
+		S1 string `poc:"binary_extension"`
+		S2 string `poc:"binary_extension"`
+		S3 string
+	}
+
+	require.PanicsWithValue(t, "the `poc: \"binary_extension\"` tags must be packed together at the end of struct fields, problematic field S3", func() {
+		var s BinaryExtensionTestStruct
+		UnmarshalBinary([]byte{0x1, 0x61, 0x01, 0x62, 0x01, 0x63}, &s)
+	})
+}
+
 func TestDecoder_readUint16_missing_data(t *testing.T) {
 
 	_, err := NewDecoder([]byte{}).ReadByte()
@@ -635,4 +674,42 @@ func TestDecoder_readUint16_missing_data(t *testing.T) {
 
 	_, err = NewDecoder([]byte{}).ReadBlockTimestamp()
 	assert.EqualError(t, err, "blockTimestamp required [4] bytes, remaining [0]")
+}
+
+func TestDecoder_SignedBlock_Full(t *testing.T) {
+	dataHex := "1b146b480000000000ea305500000000000140215a6edeea1e697207b5a917d83edf56a963d03e3d5d8d8e1ddb0900000000000000000000000000000000000000000000000000000000000000006a46611d7b15f71ff42de916e19f8ed1011096178f81d9b17987637a545b152100000000000100002001000000000000000000000000000000000000000000000000000000000000fe001f5e6962745bb4fb84dec1e7779b7e3b58c5fe20ed39c41cac1bdefe3e71568bf67bdfb05e4df40087c9ecbc6d9d0f6bcfcddfdc1d00dc1d035c665936307535ab0001000020fe00000000000000000000000000000000000000000000000000000000000004"
+	data, err := hex.DecodeString(dataHex)
+	require.NoError(t, err)
+
+	var signedBlock *SignedBlock
+	err = UnmarshalBinary(data, &signedBlock)
+	require.NoError(t, err)
+
+	expectedTimestamp, _ := time.Parse("2006-01-02T15:04:05.999-0700", "2019-04-01T22:48:45.500-0400")
+
+	// TODO: I'm not quite sure about endiannes of this value, I would have though it should have been
+	//       equal to `fe00000000000000000000000000000000000000000000000000000000000001` as in the
+	//       nodepc binary data, which is usually all big endian, it is written as
+	//       `01000000000000000000000000000000000000000000000000000000000000fe`.
+	//
+	//       Our current real data has only 0s so it's impossible to tell right endiannes. We would
+	//       need to craft a block with some data in it or search `nodepc` to validate how a `vector<char>`
+	//       is written to binary.
+	//
+	//       Same reasoning apply to both []*Extension fields
+	expectedHeaderExtension, _ := hex.DecodeString("01000000000000000000000000000000000000000000000000000000000000fe")
+	expectedBlockExtension, _ := hex.DecodeString("fe00000000000000000000000000000000000000000000000000000000000004")
+
+	assert.Equal(t, BlockTimestamp{expectedTimestamp}, signedBlock.Timestamp)
+	assert.Equal(t, AccountName("potato"), signedBlock.Producer)
+	assert.Equal(t, uint16(0), signedBlock.Confirmed)
+	assert.Equal(t, "0000000140215a6edeea1e697207b5a917d83edf56a963d03e3d5d8d8e1ddb09", signedBlock.Previous.String())
+	assert.Equal(t, "0000000000000000000000000000000000000000000000000000000000000000", signedBlock.TransactionMRoot.String())
+	assert.Equal(t, "6a46611d7b15f71ff42de916e19f8ed1011096178f81d9b17987637a545b1521", signedBlock.ActionMRoot.String())
+	assert.Equal(t, uint32(0), signedBlock.ScheduleVersion)
+	assert.Equal(t, (*OptionalProducerSchedule)(nil), signedBlock.NewProducers)
+	assert.Equal(t, []*Extension{&Extension{uint16(0), expectedHeaderExtension}}, signedBlock.HeaderExtensions)
+	assert.Equal(t, "SIG_K1_K7cBDNuka9kLUNAGaCm4FpNTdJwVKY3rP3v2esU8RGv1KXNNDEEdrWBAJSH3cPB8t1478e4RmhjkP48Sbuaqkf6Z5iDZKW", signedBlock.ProducerSignature.String())
+	assert.Equal(t, []TransactionReceipt{}, signedBlock.Transactions)
+	assert.Equal(t, []*Extension{&Extension{uint16(0), expectedBlockExtension}}, signedBlock.BlockExtensions)
 }

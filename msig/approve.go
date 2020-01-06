@@ -1,22 +1,22 @@
 package msig
 
 import (
-	eos "github.com/eoscanada/eos-go"
+	potato "github.com/rise-worlds/potato-go"
 )
 
 // NewApprove returns a `approve` action that lives on the
-// `eosio.msig` contract.
-func NewApprove(proposer eos.AccountName, proposalName eos.Name, level eos.PermissionLevel) *eos.Action {
-	return &eos.Action{
-		Account:       eos.AccountName("eosio.msig"),
-		Name:          eos.ActionName("approve"),
-		Authorization: []eos.PermissionLevel{level},
-		ActionData:    eos.NewActionData(Approve{proposer, proposalName, level}),
+// `poc.msig` contract.
+func NewApprove(proposer potato.AccountName, proposalName potato.Name, level potato.PermissionLevel) *potato.Action {
+	return &potato.Action{
+		Account:       potato.AccountName("poc.msig"),
+		Name:          potato.ActionName("approve"),
+		Authorization: []potato.PermissionLevel{level},
+		ActionData:    potato.NewActionData(Approve{proposer, proposalName, level}),
 	}
 }
 
 type Approve struct {
-	Proposer     eos.AccountName     `json:"proposer"`
-	ProposalName eos.Name            `json:"proposal_name"`
-	Level        eos.PermissionLevel `json:"level"`
+	Proposer     potato.AccountName     `json:"proposer"`
+	ProposalName potato.Name            `json:"proposal_name"`
+	Level        potato.PermissionLevel `json:"level"`
 }

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/eoscanada/eos-go/btcsuite/btcutil/base58"
+	"github.com/rise-worlds/potato-go/btcsuite/btcutil/base58"
 )
 
 type innerSignature interface {

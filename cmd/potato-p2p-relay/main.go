@@ -1,11 +1,10 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 
-	"flag"
-
-	"github.com/eoscanada/eos-go/p2p"
+	"github.com/rise-worlds/potato-go/p2p"
 )
 
 var peer = flag.String("peer", "", "peer")

@@ -1,26 +1,26 @@
 package system
 
 import (
-	eos "github.com/eoscanada/eos-go"
+	potato "github.com/rise-worlds/potato-go"
 )
 
 // NewClaimRewards will buy at current market price a given number of
 // bytes of RAM, and grant them to the `receiver` account.
-func NewClaimRewards(owner eos.AccountName) *eos.Action {
-	a := &eos.Action{
-		Account: AN("eosio"),
-		Name:    ActN("claimrewards"),
-		Authorization: []eos.PermissionLevel{
-			{Actor: owner, Permission: eos.PermissionName("active")},
+func NewClaimRewards(owner potato.AccountName) *potato.Action {
+	a := &potato.Action{
+		Account: AN("potato"),
+		Name:    ActN("claimwards"),
+		Authorization: []potato.PermissionLevel{
+			{Actor: owner, Permission: potato.PermissionName("active")},
 		},
-		ActionData: eos.NewActionData(ClaimRewards{
+		ActionData: potato.NewActionData(ClaimRewards{
 			Owner: owner,
 		}),
 	}
 	return a
 }
 
-// ClaimRewards represents the `eosio.system::claimrewards` action.
+// ClaimRewards represents the `poc.system::claimwards` action.
 type ClaimRewards struct {
-	Owner eos.AccountName `json:"owner"`
+	Owner potato.AccountName `json:"owner"`
 }

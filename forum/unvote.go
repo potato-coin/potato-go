@@ -1,18 +1,18 @@
 package forum
 
 import (
-	eos "github.com/eoscanada/eos-go"
+	potato "github.com/rise-worlds/potato-go"
 )
 
 // NewUnVote is an action representing the action to undoing a current vote
-func NewUnVote(voter eos.AccountName, proposalName eos.Name) *eos.Action {
-	a := &eos.Action{
+func NewUnVote(voter potato.AccountName, proposalName potato.Name) *potato.Action {
+	a := &potato.Action{
 		Account: ForumAN,
 		Name:    ActN("unvote"),
-		Authorization: []eos.PermissionLevel{
-			{Actor: voter, Permission: eos.PermissionName("active")},
+		Authorization: []potato.PermissionLevel{
+			{Actor: voter, Permission: potato.PermissionName("active")},
 		},
-		ActionData: eos.NewActionData(UnVote{
+		ActionData: potato.NewActionData(UnVote{
 			Voter:        voter,
 			ProposalName: proposalName,
 		}),
@@ -20,8 +20,8 @@ func NewUnVote(voter eos.AccountName, proposalName eos.Name) *eos.Action {
 	return a
 }
 
-// UnVote represents the `eosio.forum::unvote` action.
+// UnVote represents the `poc.forum::unvote` action.
 type UnVote struct {
-	Voter        eos.AccountName `json:"voter"`
-	ProposalName eos.Name        `json:"proposal_name"`
+	Voter        potato.AccountName `json:"voter"`
+	ProposalName potato.Name        `json:"proposal_name"`
 }

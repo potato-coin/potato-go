@@ -1,4 +1,4 @@
-package eos
+package potato
 
 import (
 	"bytes"
@@ -14,7 +14,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/eoscanada/eos-go/ecc"
+	"github.com/rise-worlds/potato-go/ecc"
 )
 
 type API struct {
@@ -49,7 +49,7 @@ func New(baseURL string) *API {
 				IdleConnTimeout:       90 * time.Second,
 				TLSHandshakeTimeout:   10 * time.Second,
 				ExpectContinueTimeout: 1 * time.Second,
-				DisableKeepAlives:     true, // default behavior, because of `nodeos`'s lack of support for Keep alives.
+				DisableKeepAlives:     true, // default behavior, because of `nodepc`'s lack of support for Keep alives.
 			},
 		},
 		BaseURL:  baseURL,
@@ -61,7 +61,7 @@ func New(baseURL string) *API {
 }
 
 // FixKeepAlives tests the remote server for keepalive support (the
-// main `nodeos` software doesn't in the version from March 22nd
+// main `nodepc` software doesn't in the version from March 22nd
 // 2018).  Some endpoints front their node with a keep-alive
 // supporting web server.  Adjust the `KeepAlive` support of the
 // client accordingly.
@@ -108,13 +108,13 @@ func (api *API) SetSigner(s Signer) {
 	api.Signer = s
 }
 
-// ProducerPause will pause block production on a nodeos with
+// ProducerPause will pause block production on a nodepc with
 // `producer_api` plugin loaded.
 func (api *API) ProducerPause() error {
 	return api.call("producer", "pause", nil, nil)
 }
 
-// CreateSnapshot will write a snapshot file on a nodeos with
+// CreateSnapshot will write a snapshot file on a nodepc with
 // `producer_api` plugin loaded.
 func (api *API) CreateSnapshot() (out *CreateSnapshotResp, err error) {
 	err = api.call("producer", "create_snapshot", nil, &out)
@@ -129,7 +129,7 @@ func (api *API) GetIntegrityHash() (out *GetIntegrityHashResp, err error) {
 	return
 }
 
-// ProducerResume will resume block production on a nodeos with
+// ProducerResume will resume block production on a nodepc with
 // `producer_api` plugin loaded. Obviously, this needs to be a
 // producing node on the producers schedule for it to do anything.
 func (api *API) ProducerResume() error {
@@ -302,7 +302,7 @@ func (api *API) WalletSignTransaction(tx *SignedTransaction, chainID []byte, pub
 
 // SignPushActions will create a transaction, fill it with default
 // values, sign it and submit it to the chain.  It is the highest
-// level function on top of the `/v1/chain/push_transaction` endpoint.
+// level function on top of the `/potato/chain/push_transaction` endpoint.
 func (api *API) SignPushActions(a ...*Action) (out *PushTransactionFullResp, err error) {
 	return api.SignPushActionsWithOpts(a, nil)
 }
@@ -456,8 +456,8 @@ func (api *API) GetScheduledTransactions() (out *ScheduledTransactionsResp, err 
 
 func (api *API) GetProducers() (out *ProducersResp, err error) {
 	/*
-		+FC_REFLECT( eosio::chain_apis::read_only::get_producers_params, (json)(lower_bound)(limit) )
-		+FC_REFLECT( eosio::chain_apis::read_only::get_producers_result, (rows)(total_producer_vote_weight)(more) ); */
+		+FC_REFLECT( potato::chain_apis::read_only::get_producers_params, (json)(lower_bound)(limit) )
+		+FC_REFLECT( potato::chain_apis::read_only::get_producers_result, (rows)(total_producer_vote_weight)(more) ); */
 	err = api.call("chain", "get_producers", nil, &out)
 	return
 }
@@ -498,13 +498,33 @@ func (api *API) GetActions(params GetActionsRequest) (out *ActionsResp, err erro
 	return
 }
 
+func (api *API) GetKeyAccounts(publicKey string) (out *KeyAccountsResp, err error) {
+	err = api.call("history", "get_key_accounts", M{"public_key": publicKey}, &out)
+	return
+}
+
+func (api *API) GetControlledAccounts(controllingAccount string) (out *ControlledAccountsResp, err error) {
+	err = api.call("history", "get_controlled_accounts", M{"controlling_account": controllingAccount}, &out)
+	return
+}
+
 func (api *API) GetTransactions(name AccountName) (out *TransactionsResp, err error) {
 	err = api.call("account_history", "get_transactions", M{"account_name": name}, &out)
 	return
 }
 
+func (api *API) GetTableByScope(params GetTableByScopeRequest) (out *GetTableByScopeResp, err error) {
+	err = api.call("chain", "get_table_by_scope", params, &out)
+	return
+}
+
 func (api *API) GetTableRows(params GetTableRowsRequest) (out *GetTableRowsResp, err error) {
 	err = api.call("chain", "get_table_rows", params, &out)
+	return
+}
+
+func (api *API) GetRawABI(params GetRawABIRequest) (out *GetRawABIResp, err error) {
+	err = api.call("chain", "get_raw_abi", params, &out)
 	return
 }
 
@@ -527,6 +547,16 @@ func (api *API) GetCurrencyBalance(account AccountName, symbol string, code Acco
 	return
 }
 
+func (api *API) GetCurrencyStats(code AccountName, symbol string) (out *GetCurrencyStatsResp, err error) {
+	params := M{"code": code, "symbol": symbol}
+
+	outWrapper := make(map[string]*GetCurrencyStatsResp)
+	err = api.call("chain", "get_currency_stats", params, &outWrapper)
+	out = outWrapper[symbol]
+
+	return
+}
+
 // See more here: libraries/chain/contracts/abi_serializer.cpp:58...
 
 func (api *API) call(baseAPI string, endpoint string, body interface{}, out interface{}) error {
@@ -535,7 +565,7 @@ func (api *API) call(baseAPI string, endpoint string, body interface{}, out inte
 		return err
 	}
 
-	targetURL := fmt.Sprintf("%s/v1/%s/%s", api.BaseURL, baseAPI, endpoint)
+	targetURL := fmt.Sprintf("%s/potato/%s/%s", api.BaseURL, baseAPI, endpoint)
 	req, err := http.NewRequest("POST", targetURL, jsonBody)
 	if err != nil {
 		return fmt.Errorf("NewRequest: %s", err)
@@ -578,11 +608,19 @@ func (api *API) call(baseAPI string, endpoint string, body interface{}, out inte
 		}
 		return apiErr
 	}
+
 	if resp.StatusCode > 299 {
 		var apiErr APIError
 		if err := json.Unmarshal(cnt.Bytes(), &apiErr); err != nil {
 			return fmt.Errorf("%s: status code=%d, body=%s", req.URL.String(), resp.StatusCode, cnt.String())
 		}
+
+		// Handle cases where some API calls (/potato/chain/get_account for example) returns a 500
+		// error when retrieving data that does not exist.
+		if apiErr.IsUnknownKeyError() {
+			return ErrNotFound
+		}
+
 		return apiErr
 	}
 
@@ -615,12 +653,14 @@ func enc(v interface{}) (io.Reader, error) {
 		return nil, nil
 	}
 
-	cnt, err := json.Marshal(v)
+	buffer := &bytes.Buffer{}
+	encoder := json.NewEncoder(buffer)
+	encoder.SetEscapeHTML(false)
+
+	err := encoder.Encode(v)
 	if err != nil {
 		return nil, err
 	}
 
-	//fmt.Println("BODY", string(cnt))
-
-	return bytes.NewReader(cnt), nil
+	return buffer, nil
 }

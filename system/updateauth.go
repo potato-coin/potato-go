@@ -1,20 +1,23 @@
 package system
 
-import "github.com/eoscanada/eos-go"
+import "github.com/rise-worlds/potato-go"
 
-// NewUpdateAuth creates an action from the `eosio.system` contract
+// NewUpdateAuth creates an action from the `poc.system` contract
 // called `updateauth`.
 //
 // usingPermission needs to be `owner` if you want to modify the
 // `owner` authorization, otherwise `active` will do for the rest.
-func NewUpdateAuth(account eos.AccountName, permission, parent eos.PermissionName, authority eos.Authority, usingPermission eos.PermissionName) *eos.Action {
-	a := &eos.Action{
-		Account: AN("eosio"),
+func NewUpdateAuth(account potato.AccountName, permission, parent potato.PermissionName, authority potato.Authority, usingPermission potato.PermissionName) *potato.Action {
+	a := &potato.Action{
+		Account: AN("potato"),
 		Name:    ActN("updateauth"),
-		Authorization: []eos.PermissionLevel{
-			{account, usingPermission},
+		Authorization: []potato.PermissionLevel{
+			{
+				Actor:      account,
+				Permission: usingPermission,
+			},
 		},
-		ActionData: eos.NewActionData(UpdateAuth{
+		ActionData: potato.NewActionData(UpdateAuth{
 			Account:    account,
 			Permission: permission,
 			Parent:     parent,
@@ -31,8 +34,8 @@ func NewUpdateAuth(account eos.AccountName, permission, parent eos.PermissionNam
 //
 // If you change the `owner` permission, there should be no parent.
 type UpdateAuth struct {
-	Account    eos.AccountName    `json:"account"`
-	Permission eos.PermissionName `json:"permission"`
-	Parent     eos.PermissionName `json:"parent"`
-	Auth       eos.Authority      `json:"auth"`
+	Account    potato.AccountName    `json:"account"`
+	Permission potato.PermissionName `json:"permission"`
+	Parent     potato.PermissionName `json:"parent"`
+	Auth       potato.Authority      `json:"auth"`
 }

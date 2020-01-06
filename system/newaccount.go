@@ -1,65 +1,65 @@
 package system
 
 import (
-	"github.com/eoscanada/eos-go"
-	"github.com/eoscanada/eos-go/ecc"
+	"github.com/rise-worlds/potato-go"
+	"github.com/rise-worlds/potato-go/ecc"
 )
 
 // NewNewAccount returns a `newaccount` action that lives on the
-// `eosio.system` contract.
-func NewNewAccount(creator, newAccount eos.AccountName, publicKey ecc.PublicKey) *eos.Action {
-	return &eos.Action{
-		Account: AN("eosio"),
+// `poc.system` contract.
+func NewNewAccount(creator, newAccount potato.AccountName, publicKey ecc.PublicKey) *potato.Action {
+	return &potato.Action{
+		Account: AN("potato"),
 		Name:    ActN("newaccount"),
-		Authorization: []eos.PermissionLevel{
+		Authorization: []potato.PermissionLevel{
 			{Actor: creator, Permission: PN("active")},
 		},
-		ActionData: eos.NewActionData(NewAccount{
+		ActionData: potato.NewActionData(NewAccount{
 			Creator: creator,
 			Name:    newAccount,
-			Owner: eos.Authority{
+			Owner: potato.Authority{
 				Threshold: 1,
-				Keys: []eos.KeyWeight{
+				Keys: []potato.KeyWeight{
 					{
 						PublicKey: publicKey,
 						Weight:    1,
 					},
 				},
-				Accounts: []eos.PermissionLevelWeight{},
+				Accounts: []potato.PermissionLevelWeight{},
 			},
-			Active: eos.Authority{
+			Active: potato.Authority{
 				Threshold: 1,
-				Keys: []eos.KeyWeight{
+				Keys: []potato.KeyWeight{
 					{
 						PublicKey: publicKey,
 						Weight:    1,
 					},
 				},
-				Accounts: []eos.PermissionLevelWeight{},
+				Accounts: []potato.PermissionLevelWeight{},
 			},
 		}),
 	}
 }
 
 // NewDelegatedNewAccount returns a `newaccount` action that lives on the
-// `eosio.system` contract. It is filled with an authority structure that
+// `poc.system` contract. It is filled with an authority structure that
 // delegates full control of the new account to an already existing account.
-func NewDelegatedNewAccount(creator, newAccount eos.AccountName, delegatedTo eos.AccountName) *eos.Action {
-	return &eos.Action{
-		Account: AN("eosio"),
+func NewDelegatedNewAccount(creator, newAccount potato.AccountName, delegatedTo potato.AccountName) *potato.Action {
+	return &potato.Action{
+		Account: AN("potato"),
 		Name:    ActN("newaccount"),
-		Authorization: []eos.PermissionLevel{
+		Authorization: []potato.PermissionLevel{
 			{Actor: creator, Permission: PN("active")},
 		},
-		ActionData: eos.NewActionData(NewAccount{
+		ActionData: potato.NewActionData(NewAccount{
 			Creator: creator,
 			Name:    newAccount,
-			Owner: eos.Authority{
+			Owner: potato.Authority{
 				Threshold: 1,
-				Keys:      []eos.KeyWeight{},
-				Accounts: []eos.PermissionLevelWeight{
-					eos.PermissionLevelWeight{
-						Permission: eos.PermissionLevel{
+				Keys:      []potato.KeyWeight{},
+				Accounts: []potato.PermissionLevelWeight{
+					potato.PermissionLevelWeight{
+						Permission: potato.PermissionLevel{
 							Actor:      delegatedTo,
 							Permission: PN("active"),
 						},
@@ -67,12 +67,12 @@ func NewDelegatedNewAccount(creator, newAccount eos.AccountName, delegatedTo eos
 					},
 				},
 			},
-			Active: eos.Authority{
+			Active: potato.Authority{
 				Threshold: 1,
-				Keys:      []eos.KeyWeight{},
-				Accounts: []eos.PermissionLevelWeight{
-					eos.PermissionLevelWeight{
-						Permission: eos.PermissionLevel{
+				Keys:      []potato.KeyWeight{},
+				Accounts: []potato.PermissionLevelWeight{
+					potato.PermissionLevelWeight{
+						Permission: potato.PermissionLevel{
 							Actor:      delegatedTo,
 							Permission: PN("active"),
 						},
@@ -85,16 +85,16 @@ func NewDelegatedNewAccount(creator, newAccount eos.AccountName, delegatedTo eos
 }
 
 // NewCustomNewAccount returns a `newaccount` action that lives on the
-// `eosio.system` contract. You can specify your own `owner` and
+// `poc.system` contract. You can specify your own `owner` and
 // `active` permissions.
-func NewCustomNewAccount(creator, newAccount eos.AccountName, owner, active eos.Authority) *eos.Action {
-	return &eos.Action{
-		Account: AN("eosio"),
+func NewCustomNewAccount(creator, newAccount potato.AccountName, owner, active potato.Authority) *potato.Action {
+	return &potato.Action{
+		Account: AN("potato"),
 		Name:    ActN("newaccount"),
-		Authorization: []eos.PermissionLevel{
+		Authorization: []potato.PermissionLevel{
 			{Actor: creator, Permission: PN("active")},
 		},
-		ActionData: eos.NewActionData(NewAccount{
+		ActionData: potato.NewActionData(NewAccount{
 			Creator: creator,
 			Name:    newAccount,
 			Owner:   owner,
@@ -103,12 +103,12 @@ func NewCustomNewAccount(creator, newAccount eos.AccountName, owner, active eos.
 	}
 }
 
-// NewAccount represents a `newaccount` action on the `eosio.system`
+// NewAccount represents a `newaccount` action on the `poc.system`
 // contract. It is one of the rare ones to be hard-coded into the
 // blockchain.
 type NewAccount struct {
-	Creator eos.AccountName `json:"creator"`
-	Name    eos.AccountName `json:"name"`
-	Owner   eos.Authority   `json:"owner"`
-	Active  eos.Authority   `json:"active"`
+	Creator potato.AccountName `json:"creator"`
+	Name    potato.AccountName `json:"name"`
+	Owner   potato.Authority   `json:"owner"`
+	Active  potato.Authority   `json:"active"`
 }

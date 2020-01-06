@@ -1,23 +1,23 @@
 package token
 
-import eos "github.com/eoscanada/eos-go"
+import potato "github.com/rise-worlds/potato-go"
 
-func NewCreate(issuer eos.AccountName, maxSupply eos.Asset) *eos.Action {
-	return &eos.Action{
-		Account: AN("eosio.token"),
+func NewCreate(issuer potato.AccountName, maxSupply potato.Asset) *potato.Action {
+	return &potato.Action{
+		Account: AN("poc.token"),
 		Name:    ActN("create"),
-		Authorization: []eos.PermissionLevel{
-			{Actor: AN("eosio.token"), Permission: PN("active")},
+		Authorization: []potato.PermissionLevel{
+			{Actor: AN("poc.token"), Permission: PN("active")},
 		},
-		ActionData: eos.NewActionData(Create{
+		ActionData: potato.NewActionData(Create{
 			Issuer:        issuer,
 			MaximumSupply: maxSupply,
 		}),
 	}
 }
 
-// Create represents the `create` struct on the `eosio.token` contract.
+// Create represents the `create` struct on the `poc.token` contract.
 type Create struct {
-	Issuer        eos.AccountName `json:"issuer"`
-	MaximumSupply eos.Asset       `json:"maximum_supply"`
+	Issuer        potato.AccountName `json:"issuer"`
+	MaximumSupply potato.Asset       `json:"maximum_supply"`
 }

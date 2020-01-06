@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/eoscanada/eos-go/p2p"
+	"github.com/rise-worlds/potato-go/p2p"
 )
 
 var peer = flag.String("peer", "localhost:9876", "peer to connect to")
@@ -28,7 +28,7 @@ func main() {
 
 	fmt.Println("P2P Client ", *peer, " With Chain ID :", *chainID)
 	client := p2p.NewClient(
-		p2p.NewOutgoingPeer(*peer, "eos-proxy", &p2p.HandshakeInfo{
+		p2p.NewOutgoingPeer(*peer, "potato-proxy", &p2p.HandshakeInfo{
 			ChainID:      cID,
 			HeadBlockNum: 1,
 		}),

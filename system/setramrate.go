@@ -1,17 +1,20 @@
 package system
 
 import (
-	eos "github.com/eoscanada/eos-go"
+	potato "github.com/rise-worlds/potato-go"
 )
 
-func NewSetRAMRate(bytesPerBlock uint16) *eos.Action {
-	a := &eos.Action{
-		Account: AN("eosio"),
+func NewSetRAMRate(bytesPerBlock uint16) *potato.Action {
+	a := &potato.Action{
+		Account: AN("potato"),
 		Name:    ActN("setram"),
-		Authorization: []eos.PermissionLevel{
-			{AN("eosio"), eos.PermissionName("active")},
+		Authorization: []potato.PermissionLevel{
+			{
+				Actor:      AN("potato"),
+				Permission: potato.PermissionName("active"),
+			},
 		},
-		ActionData: eos.NewActionData(SetRAMRate{
+		ActionData: potato.NewActionData(SetRAMRate{
 			BytesPerBlock: bytesPerBlock,
 		}),
 	}

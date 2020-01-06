@@ -1,7 +1,7 @@
 package token
 
-import eos "github.com/eoscanada/eos-go"
+import potato "github.com/rise-worlds/potato-go"
 
-var AN = eos.AN
-var PN = eos.PN
-var ActN = eos.ActN
+var AN = potato.AN
+var PN = potato.PN
+var ActN = potato.ActN

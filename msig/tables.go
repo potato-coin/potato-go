@@ -1,10 +1,10 @@
 package msig
 
-import eos "github.com/eoscanada/eos-go"
+import potato "github.com/rise-worlds/potato-go"
 
 type ProposalRow struct {
-	ProposalName       eos.Name              `json:"proposal_name"`
-	RequestedApprovals []eos.PermissionLevel `json:"requested_approvals"`
-	ProvidedApprovals  []eos.PermissionLevel `json:"provided_approvals"`
-	PackedTransaction  eos.HexBytes          `json:"packed_transaction"`
+	ProposalName       potato.Name              `json:"proposal_name"`
+	RequestedApprovals []potato.PermissionLevel `json:"requested_approvals"`
+	ProvidedApprovals  []potato.PermissionLevel `json:"provided_approvals"`
+	PackedTransaction  potato.HexBytes          `json:"packed_transaction"`
 }

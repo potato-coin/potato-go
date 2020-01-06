@@ -1,38 +1,38 @@
 package system
 
 import (
-	"github.com/eoscanada/eos-go"
+	"github.com/rise-worlds/potato-go"
 )
 
 func init() {
-	eos.RegisterAction(AN("eosio"), ActN("setcode"), SetCode{})
-	eos.RegisterAction(AN("eosio"), ActN("setabi"), SetABI{})
-	eos.RegisterAction(AN("eosio"), ActN("newaccount"), NewAccount{})
-	eos.RegisterAction(AN("eosio"), ActN("delegatebw"), DelegateBW{})
-	eos.RegisterAction(AN("eosio"), ActN("undelegatebw"), UndelegateBW{})
-	eos.RegisterAction(AN("eosio"), ActN("refund"), Refund{})
-	eos.RegisterAction(AN("eosio"), ActN("regproducer"), RegProducer{})
-	eos.RegisterAction(AN("eosio"), ActN("unregprod"), UnregProducer{})
-	eos.RegisterAction(AN("eosio"), ActN("regproxy"), RegProxy{})
-	eos.RegisterAction(AN("eosio"), ActN("voteproducer"), VoteProducer{})
-	eos.RegisterAction(AN("eosio"), ActN("claimrewards"), ClaimRewards{})
-	eos.RegisterAction(AN("eosio"), ActN("buyram"), BuyRAM{})
-	eos.RegisterAction(AN("eosio"), ActN("buyrambytes"), BuyRAMBytes{})
-	eos.RegisterAction(AN("eosio"), ActN("linkauth"), LinkAuth{})
-	eos.RegisterAction(AN("eosio"), ActN("unlinkauth"), UnlinkAuth{})
-	eos.RegisterAction(AN("eosio"), ActN("deleteauth"), DeleteAuth{})
-	eos.RegisterAction(AN("eosio"), ActN("rmvproducer"), RemoveProducer{})
-	eos.RegisterAction(AN("eosio"), ActN("setprods"), SetProds{})
-	eos.RegisterAction(AN("eosio"), ActN("setpriv"), SetPriv{})
-	eos.RegisterAction(AN("eosio"), ActN("canceldelay"), CancelDelay{})
-	eos.RegisterAction(AN("eosio"), ActN("bidname"), Bidname{})
-	// eos.RegisterAction(AN("eosio"), ActN("nonce"), &Nonce{})
-	eos.RegisterAction(AN("eosio"), ActN("sellram"), SellRAM{})
-	eos.RegisterAction(AN("eosio"), ActN("updateauth"), UpdateAuth{})
-	eos.RegisterAction(AN("eosio"), ActN("setramrate"), SetRAMRate{})
-	eos.RegisterAction(AN("eosio"), ActN("setalimits"), Setalimits{})
+	potato.RegisterAction(AN("potato"), ActN("setcode"), SetCode{})
+	potato.RegisterAction(AN("potato"), ActN("setabi"), SetABI{})
+	potato.RegisterAction(AN("potato"), ActN("newaccount"), NewAccount{})
+	potato.RegisterAction(AN("potato"), ActN("delegatebw"), DelegateBW{})
+	potato.RegisterAction(AN("potato"), ActN("undelegatebw"), UnDelegateBW{})
+	potato.RegisterAction(AN("potato"), ActN("refund"), Refund{})
+	potato.RegisterAction(AN("potato"), ActN("regproducer"), RegProducer{})
+	potato.RegisterAction(AN("potato"), ActN("unregproducer"), UnregProducer{})
+	potato.RegisterAction(AN("potato"), ActN("regproxy"), RegProxy{})
+	potato.RegisterAction(AN("potato"), ActN("voteproducer"), VoteProducer{})
+	potato.RegisterAction(AN("potato"), ActN("claimwards"), ClaimRewards{})
+	potato.RegisterAction(AN("potato"), ActN("buyram"), BuyRAM{})
+	potato.RegisterAction(AN("potato"), ActN("buyrambytes"), BuyRAMBytes{})
+	potato.RegisterAction(AN("potato"), ActN("linkauth"), LinkAuth{})
+	potato.RegisterAction(AN("potato"), ActN("unlinkauth"), UnlinkAuth{})
+	potato.RegisterAction(AN("potato"), ActN("deleteauth"), DeleteAuth{})
+	potato.RegisterAction(AN("potato"), ActN("rmvproducer"), RemoveProducer{})
+	potato.RegisterAction(AN("potato"), ActN("setprods"), SetProds{})
+	potato.RegisterAction(AN("potato"), ActN("setpriv"), SetPriv{})
+	potato.RegisterAction(AN("potato"), ActN("canceldelay"), CancelDelay{})
+	potato.RegisterAction(AN("potato"), ActN("bidname"), Bidname{})
+	// potato.RegisterAction(AN("potato"), ActN("nonce"), &Nonce{})
+	potato.RegisterAction(AN("potato"), ActN("sellram"), SellRAM{})
+	potato.RegisterAction(AN("potato"), ActN("updateauth"), UpdateAuth{})
+	potato.RegisterAction(AN("potato"), ActN("setramrate"), SetRAMRate{})
+	potato.RegisterAction(AN("potato"), ActN("setalimits"), Setalimits{})
 }
 
-var AN = eos.AN
-var PN = eos.PN
-var ActN = eos.ActN
+var AN = potato.AN
+var PN = potato.PN
+var ActN = potato.ActN

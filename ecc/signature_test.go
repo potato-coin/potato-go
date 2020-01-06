@@ -21,7 +21,7 @@ func TestSignatureSerialization(t *testing.T) {
 	require.NoError(t, err)
 	pubKey, err := sig.PublicKey(digest)
 	require.NoError(t, err)
-	assert.Equal(t, `EOS5jSQLpKBHLaMtuzkftnYE6bCMA5Jxso8f22uZyKj6cDEp32eSj`, pubKey.String()) // not checked after..
+	assert.Equal(t, `POC5jSQLpKBHLaMtuzkftnYE6bCMA5Jxso8f22uZyKj6cDEp32eSj`, pubKey.String()) // not checked after..
 	assert.True(t, isCanonical([]byte(sig.Content)))
 }
 
@@ -110,7 +110,7 @@ func TestSignaturePublicKeyExtraction(t *testing.T) {
 			signature:      "SIG_K1_KW4qcHDh6ziqWELRAsFx42sgPuP3VfCpTKX4D5A3uZhFb3fzojTeGohja19g4EJa9Zv7SrGZ47H8apo1sNa2bwPvGwW2ba",
 			payload:        "45e2ea5b22f87c6f74430000000001a0904b1822f330550040346aabab904b01a0904b1822f3305500000000a8ed32329d01fb5f27000000000027e2ea5b0000000082b4c2a389d911f1cef87b3f10dc38e8f5118ce5b83e160c5813447db849ea89c1d910841a3662747dd0e6e0040b1317be571384054a30f7e6851ebda9adab9c0a9394a5bb26479b697937fbe8b4a9d2780bee68334b2800000000000004454f5300000000000000000000000004454f53000000000000000000000000000000000000000004454f530000000000",
 			chainID:        "aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906",
-			expectedPubKey: "EOS7KtnQUSGVf4vbFE2eQsWmDp4iV93jVcSmdQXtRdRRnWj2ubbFW",
+			expectedPubKey: "POC7KtnQUSGVf4vbFE2eQsWmDp4iV93jVcSmdQXtRdRRnWj2ubbFW",
 		},
 		{
 			name:                "R1",
@@ -148,9 +148,9 @@ func TestSignaturePublicKeyExtraction(t *testing.T) {
 
 }
 
-func TestEOSIOCSigningComparison(t *testing.T) {
+func TestPotatoSigningComparison(t *testing.T) {
 	// try with: ec sign -k 5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3 '{"expiration":"2018-03-21T23:02:32","region":0,"ref_block_num":2156,"ref_block_prefix":1532582828,"packed_bandwidth_words":0,"context_free_cpu_bandwidth":0,"context_free_actions":[],"actions":[],"signatures":[],"context_free_data":[]}'
-	wif := "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3" // corresponds to: EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+	wif := "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3" // corresponds to: POC6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
 	privKey, err := NewPrivateKey(wif)
 	require.NoError(t, err)
 
@@ -168,15 +168,15 @@ func TestEOSIOCSigningComparison(t *testing.T) {
 	pubKey, err := sig.PublicKey(digest)
 	require.NoError(t, err)
 
-	assert.Equal(t, "EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV", pubKey.String())
+	assert.Equal(t, "POC6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV", pubKey.String())
 }
 
-func TestNodeosSignatureComparison(t *testing.T) {
-	wif := "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3" // corresponds to: EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+func TestnodepcSignatureComparison(t *testing.T) {
+	wif := "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3" // corresponds to: POC6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
 	privKey, err := NewPrivateKey(wif)
 	require.NoError(t, err)
 
-	// produce with `cleos create account eosio abourget EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+	// produce with `clpoc create account potato abourget POC6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV POC6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
 	// transaction:
 	// chainID + 30d3b35a0000be0194c22fe70000000000010000000000ea305500409e9a2264b89a010000000000ea305500000000a8ed32327c0000000000ea305500000059b1abe93101000000010002c0ded2bc1f1305fb0faac5e6c03ee3a1924234985427b6167ca569d13df435cf01000001000000010002c0ded2bc1f1305fb0faac5e6c03ee3a1924234985427b6167ca569d13df435cf0100000100000000010000000000ea305500000000a8ed323201000000
 	// hashes to:
@@ -187,16 +187,16 @@ func TestNodeosSignatureComparison(t *testing.T) {
 
 	pubKey, err := sig.PublicKey(digest)
 
-	assert.Equal(t, "EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV", pubKey.String())
+	assert.Equal(t, "POC6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV", pubKey.String())
 }
 
 func TestSignatureUnmarshalChecksum(t *testing.T) {
-	fromEOSIOC := "SIG_K1_KW4qcHDh6ziqWELRAsFx42sgPuP3VfCpTKX4D5A3uZhFb3fzojTeGohja19g4EJa9Zv7SrGZ47H8apo1sNa2bwPvGwW2bb" // simply checked the last 2 bytes
-	_, err := NewSignature(fromEOSIOC)
+	fromPotatoC := "SIG_K1_KW4qcHDh6ziqWELRAsFx42sgPuP3VfCpTKX4D5A3uZhFb3fzojTeGohja19g4EJa9Zv7SrGZ47H8apo1sNa2bwPvGwW2bb" // simply checked the last 2 bytes
+	_, err := NewSignature(fromPotatoC)
 	require.Equal(t, "signature checksum failed, found a9c72981 expected a9c72982", err.Error())
 }
 
-//to do this here because of a import cycle when use eos.SigDigest
+//to do this here because of a import cycle when use poc.SigDigest
 func sigDigest(chainID, payload, contextFreeData []byte) []byte {
 	h := sha256.New()
 	if len(chainID) == 0 {

@@ -1,18 +1,18 @@
 package forum
 
 import (
-	eos "github.com/eoscanada/eos-go"
+	potato "github.com/rise-worlds/potato-go"
 )
 
 // NewUnPost is an action undoing a post that is active
-func NewUnPost(poster eos.AccountName, postUUID string) *eos.Action {
-	a := &eos.Action{
+func NewUnPost(poster potato.AccountName, postUUID string) *potato.Action {
+	a := &potato.Action{
 		Account: ForumAN,
 		Name:    ActN("unpost"),
-		Authorization: []eos.PermissionLevel{
-			{Actor: poster, Permission: eos.PermissionName("active")},
+		Authorization: []potato.PermissionLevel{
+			{Actor: poster, Permission: potato.PermissionName("active")},
 		},
-		ActionData: eos.NewActionData(UnPost{
+		ActionData: potato.NewActionData(UnPost{
 			Poster:   poster,
 			PostUUID: postUUID,
 		}),
@@ -20,8 +20,8 @@ func NewUnPost(poster eos.AccountName, postUUID string) *eos.Action {
 	return a
 }
 
-// UnPost represents the `eosio.forum::unpost` action.
+// UnPost represents the `poc.forum::unpost` action.
 type UnPost struct {
-	Poster   eos.AccountName `json:"poster"`
+	Poster   potato.AccountName `json:"poster"`
 	PostUUID string          `json:"post_uuid"`
 }

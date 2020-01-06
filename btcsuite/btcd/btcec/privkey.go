@@ -64,7 +64,7 @@ func (p *PrivateKey) Sign(hash []byte) (*Signature, error) {
 }
 
 // SignCanonical goes through signatures and returns only a canonical
-// representations.  This matches the EOS blockchain expectations.
+// representations.  This matches the potato blockchain expectations.
 func (p *PrivateKey) SignCanonical(curve *KoblitzCurve, hash []byte) ([]byte, error) {
 	for i := 0; i < 25; i++ {
 		sig, err := signRFC6979(p, hash, i)
@@ -95,7 +95,7 @@ func (p *PrivateKey) Serialize() []byte {
 }
 
 func isCanonical(compactSig []byte) bool {
-	// From EOS's codebase, our way of doing Canonical sigs.
+	// From potato's codebase, our way of doing Canonical sigs.
 	// https://steemit.com/steem/@dantheman/steem-and-bitshares-cryptographic-security-update
 	//
 	// !(c.data[1] & 0x80)

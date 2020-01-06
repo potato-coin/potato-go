@@ -1,4 +1,4 @@
-package eos
+package potato
 
 import (
 	"encoding/hex"
@@ -8,7 +8,25 @@ import (
 	"encoding/json"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
+
+func TestUnmarshalAuthSequenceString(t *testing.T) {
+	resp := &TransactionTraceAuthSequence{}
+
+	err := json.Unmarshal([]byte(`["hello", "123"]`), resp)
+	require.NoError(t, err)
+	assert.Equal(t, AccountName("hello"), resp.Account)
+	assert.Equal(t, Uint64(123), resp.Sequence)
+}
+func TestUnmarshalAuthSequenceFloat64(t *testing.T) {
+	resp := &TransactionTraceAuthSequence{}
+
+	err := json.Unmarshal([]byte(`["hello", 123]`), resp)
+	require.NoError(t, err)
+	assert.Equal(t, AccountName("hello"), resp.Account)
+	assert.Equal(t, Uint64(123), resp.Sequence)
+}
 
 func TestUnmarshalAccountResp(t *testing.T) {
 	resp := &AccountResp{}
@@ -26,7 +44,7 @@ func TestUnmarshalBlockResp(t *testing.T) {
 	err := json.Unmarshal([]byte(blockResponseJSONData), resp)
 	assert.NoError(t, err)
 
-	timestamp, _ := time.Parse("2006-01-02T15:04:05.000", "2018-07-17T11:18:10.000")
+	timestamp, _ := time.Parse("2006-01-02T15:04:05.999", "2018-07-17T11:18:10.000")
 
 	// Block Header
 	assert.Equal(t, BlockTimestamp{timestamp}, resp.Timestamp)
@@ -106,7 +124,7 @@ var accountResponseJSONData = `{
 	"privileged": false,
 	"last_code_update": "1970-01-01T00:00:00.000",
 	"created": "2018-06-10T13:09:26.500",
-	"core_liquid_balance": "695.2674 EOS",
+	"core_liquid_balance": "695.2674 POC",
 	"ram_quota": 145360,
 	"net_weight": 324628,
 	"cpu_weight": 329628,
@@ -129,7 +147,7 @@ var accountResponseJSONData = `{
 			"threshold": 1,
 			"keys": [
 			{
-				"key": "EOS6HSE9SVvNmGF4Dv8cHLUjF8BigorYykUG2z8UbHZd1BQ9qF88r",
+				"key": "POC6HSE9SVvNmGF4Dv8cHLUjF8BigorYykUG2z8UbHZd1BQ9qF88r",
 				"weight": 1
 			}
 			],
@@ -144,7 +162,7 @@ var accountResponseJSONData = `{
 			"threshold": 1,
 			"keys": [
 			{
-				"key": "EOS7FJJ7igorHoTq6y6yd7GmRei9cc6CRhR7L2TXP6H9UFEP49jNc",
+				"key": "POC7FJJ7igorHoTq6y6yd7GmRei9cc6CRhR7L2TXP6H9UFEP49jNc",
 				"weight": 1
 			}
 			],
@@ -159,7 +177,7 @@ var accountResponseJSONData = `{
 			"threshold": 1,
 			"keys": [
 			{
-				"key": "EOS5UhWBMYKPPzb4tigorbnrH9Ft7mogW1MmvViaHJkBif2kSa1f4",
+				"key": "POC5UhWBMYKPPzb4tigorbnrH9Ft7mogW1MmvViaHJkBif2kSa1f4",
 				"weight": 1
 			}
 			],
@@ -170,21 +188,21 @@ var accountResponseJSONData = `{
 	],
 	"total_resources": {
 		"owner": "eosriobrazil",
-		"net_weight": "32.4628 EOS",
-		"cpu_weight": "32.9628 EOS",
+		"net_weight": "32.4628 POC",
+		"cpu_weight": "32.9628 POC",
 		"ram_bytes": 145360
 	},
 	"self_delegated_bandwidth": {
 		"from": "eosriobrazil",
 		"to": "eosriobrazil",
-		"net_weight": "32.4628 EOS",
-		"cpu_weight": "32.9628 EOS"
+		"net_weight": "32.4628 POC",
+		"cpu_weight": "32.9628 POC"
 	},
 	"refund_request": {
 		"owner": "eosriobrazil",
 		"request_time": "2018-07-09T20:54:31",
-		"net_amount": "2.9284 EOS",
-		"cpu_amount": "2.9284 EOS"
+		"net_amount": "2.9284 POC",
+		"cpu_amount": "2.9284 POC"
 	},
 	"voter_info": {
 		"owner": "eosriobrazil",
@@ -257,7 +275,7 @@ var blockResponseJSONData = `
 				"data": {
 				  "from": "gy4dkmjzhege",
 				  "memo": "",
-				  "quantity": "0.5000 EOSDAC",
+				  "quantity": "0.5000 POCDAC",
 				  "to": "gy4dqojtg411"
 				},
 				"hex_data": "a0986aff49988867100261f9519b8867881300000000000004454f534441430000",

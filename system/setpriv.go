@@ -1,21 +1,21 @@
 package system
 
-import eos "github.com/eoscanada/eos-go"
+import potato "github.com/rise-worlds/potato-go"
 
 // NewSetPriv returns a `setpriv` action that lives on the
-// `eosio.bios` contract. It should exist only when booting a new
-// network, as it is replaced using the `eos-bios` boot process by the
-// `eosio.system` contract.
-func NewSetPriv(account eos.AccountName) *eos.Action {
-	a := &eos.Action{
-		Account: AN("eosio"),
+// `poc.bios` contract. It should exist only when booting a new
+// network, as it is replaced using the `potato-bios` boot process by the
+// `poc.system` contract.
+func NewSetPriv(account potato.AccountName) *potato.Action {
+	a := &potato.Action{
+		Account: AN("potato"),
 		Name:    ActN("setpriv"),
-		Authorization: []eos.PermissionLevel{
-			{Actor: AN("eosio"), Permission: PN("active")},
+		Authorization: []potato.PermissionLevel{
+			{Actor: AN("potato"), Permission: PN("active")},
 		},
-		ActionData: eos.NewActionData(SetPriv{
+		ActionData: potato.NewActionData(SetPriv{
 			Account: account,
-			IsPriv:  eos.Bool(true),
+			IsPriv:  potato.Bool(true),
 		}),
 	}
 	return a
@@ -23,6 +23,6 @@ func NewSetPriv(account eos.AccountName) *eos.Action {
 
 // SetPriv sets privileged account status. Used in the bios boot mechanism.
 type SetPriv struct {
-	Account eos.AccountName `json:"account"`
-	IsPriv  eos.Bool        `json:"is_priv"`
+	Account potato.AccountName `json:"account"`
+	IsPriv  potato.Bool        `json:"is_priv"`
 }

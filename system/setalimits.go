@@ -1,18 +1,18 @@
 package system
 
 import (
-	eos "github.com/eoscanada/eos-go"
+	potato "github.com/rise-worlds/potato-go"
 )
 
-// NewSetalimits sets the account limits. Requires signature from `eosio@active` account.
-func NewSetalimits(account eos.AccountName, ramBytes, netWeight, cpuWeight int64) *eos.Action {
-	a := &eos.Action{
-		Account: AN("eosio"),
+// NewSetalimits sets the account limits. Requires signature from `potato@active` account.
+func NewSetalimits(account potato.AccountName, ramBytes, netWeight, cpuWeight int64) *potato.Action {
+	a := &potato.Action{
+		Account: AN("potato"),
 		Name:    ActN("setalimit"),
-		Authorization: []eos.PermissionLevel{
-			{Actor: eos.AccountName("eosio"), Permission: PN("active")},
+		Authorization: []potato.PermissionLevel{
+			{Actor: potato.AccountName("potato"), Permission: PN("active")},
 		},
-		ActionData: eos.NewActionData(Setalimits{
+		ActionData: potato.NewActionData(Setalimits{
 			Account:   account,
 			RAMBytes:  ramBytes,
 			NetWeight: netWeight,
@@ -22,9 +22,9 @@ func NewSetalimits(account eos.AccountName, ramBytes, netWeight, cpuWeight int64
 	return a
 }
 
-// Setalimits represents the `eosio.system::setalimit` action.
+// Setalimits represents the `poc.system::setalimit` action.
 type Setalimits struct {
-	Account   eos.AccountName `json:"account"`
+	Account   potato.AccountName `json:"account"`
 	RAMBytes  int64           `json:"ram_bytes"`
 	NetWeight int64           `json:"net_weight"`
 	CPUWeight int64           `json:"cpu_weight"`

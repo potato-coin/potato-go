@@ -1,21 +1,21 @@
 package system
 
-import "github.com/eoscanada/eos-go"
+import "github.com/rise-worlds/potato-go"
 
-// NewDeleteAuth creates an action from the `eosio.system` contract
+// NewDeleteAuth creates an action from the `poc.system` contract
 // called `deleteauth`.
 //
 // You cannot delete the `owner` or `active` permissions.  Also, if a
 // permission is still linked through a previous `updatelink` action,
 // you will need to `unlinkauth` first.
-func NewDeleteAuth(account eos.AccountName, permission eos.PermissionName) *eos.Action {
-	a := &eos.Action{
-		Account: AN("eosio"),
+func NewDeleteAuth(account potato.AccountName, permission potato.PermissionName) *potato.Action {
+	a := &potato.Action{
+		Account: AN("potato"),
 		Name:    ActN("deleteauth"),
-		Authorization: []eos.PermissionLevel{
-			{Actor: account, Permission: eos.PermissionName("active")},
+		Authorization: []potato.PermissionLevel{
+			{Actor: account, Permission: potato.PermissionName("active")},
 		},
-		ActionData: eos.NewActionData(DeleteAuth{
+		ActionData: potato.NewActionData(DeleteAuth{
 			Account:    account,
 			Permission: permission,
 		}),
@@ -25,8 +25,8 @@ func NewDeleteAuth(account eos.AccountName, permission eos.PermissionName) *eos.
 }
 
 // DeleteAuth represents the native `deleteauth` action, reachable
-// through the `eosio.system` contract.
+// through the `poc.system` contract.
 type DeleteAuth struct {
-	Account    eos.AccountName    `json:"account"`
-	Permission eos.PermissionName `json:"permission"`
+	Account    potato.AccountName    `json:"account"`
+	Permission potato.PermissionName `json:"permission"`
 }

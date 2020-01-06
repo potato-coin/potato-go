@@ -1,15 +1,15 @@
 package token
 
-import eos "github.com/eoscanada/eos-go"
+import potato "github.com/rise-worlds/potato-go"
 
-func NewTransfer(from, to eos.AccountName, quantity eos.Asset, memo string) *eos.Action {
-	return &eos.Action{
-		Account: AN("eosio.token"),
+func NewTransfer(from, to potato.AccountName, quantity potato.Asset, memo string) *potato.Action {
+	return &potato.Action{
+		Account: AN("poc.token"),
 		Name:    ActN("transfer"),
-		Authorization: []eos.PermissionLevel{
+		Authorization: []potato.PermissionLevel{
 			{Actor: from, Permission: PN("active")},
 		},
-		ActionData: eos.NewActionData(Transfer{
+		ActionData: potato.NewActionData(Transfer{
 			From:     from,
 			To:       to,
 			Quantity: quantity,
@@ -18,10 +18,10 @@ func NewTransfer(from, to eos.AccountName, quantity eos.Asset, memo string) *eos
 	}
 }
 
-// Transfer represents the `transfer` struct on `eosio.token` contract.
+// Transfer represents the `transfer` struct on `poc.token` contract.
 type Transfer struct {
-	From     eos.AccountName `json:"from"`
-	To       eos.AccountName `json:"to"`
-	Quantity eos.Asset       `json:"quantity"`
+	From     potato.AccountName `json:"from"`
+	To       potato.AccountName `json:"to"`
+	Quantity potato.Asset       `json:"quantity"`
 	Memo     string          `json:"memo"`
 }

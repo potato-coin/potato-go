@@ -1,4 +1,4 @@
-package eos
+package potato
 
 import (
 	"encoding/json"
@@ -7,7 +7,7 @@ import (
 )
 
 // see: libraries/chain/contracts/abi_serializer.cpp:53...
-// see: libraries/chain/include/eosio/chain/contracts/types.hpp:100
+// see: libraries/chain/include/potato/chain/contracts/types.hpp:100
 type ABI struct {
 	Version          string            `json:"version"`
 	Types            []ABIType         `json:"types,omitempty"`
@@ -17,6 +17,7 @@ type ABI struct {
 	RicardianClauses []ClausePair      `json:"ricardian_clauses,omitempty"`
 	ErrorMessages    []ABIErrorMessage `json:"error_messages,omitempty"`
 	Extensions       []*Extension      `json:"abi_extensions,omitempty"`
+	Variants         []VariantDef      `json:"variants,omitempty" potato:"binary_extension"`
 }
 
 func NewABI(r io.Reader) (*ABI, error) {
@@ -57,13 +58,22 @@ func (a *ABI) TableForName(name TableName) *TableDef {
 	return nil
 }
 
-func (a *ABI) TypeNameForNewTypeName(typeName string) string {
-	for _, t := range a.Types {
-		if t.NewTypeName == typeName {
-			return t.Type
+func (a *ABI) VariantForName(name string) *VariantDef {
+	for _, s := range a.Variants {
+		if s.Name == name {
+			return &s
 		}
 	}
-	return typeName
+	return nil
+}
+
+func (a *ABI) TypeNameForNewTypeName(typeName string) (resolvedTypeName string, isAlias bool) {
+	for _, t := range a.Types {
+		if t.NewTypeName == typeName {
+			return t.Type, true
+		}
+	}
+	return typeName, false
 }
 
 type ABIType struct {
@@ -88,13 +98,19 @@ type ActionDef struct {
 	RicardianContract string     `json:"ricardian_contract"`
 }
 
-// TableDef defines a table. See libraries/chain/include/eosio/chain/contracts/types.hpp:78
+// TableDef defines a table. See libraries/chain/include/potato/chain/contracts/types.hpp:78
 type TableDef struct {
 	Name      TableName `json:"name"`
 	IndexType string    `json:"index_type"`
 	KeyNames  []string  `json:"key_names,omitempty"`
 	KeyTypes  []string  `json:"key_types,omitempty"`
 	Type      string    `json:"type"`
+}
+
+// VariantDef defines a variant type. See libraries/chain/include/potato/chain/contracts/types.hpp:78
+type VariantDef struct {
+	Name  string   `json:"name"`
+	Types []string `json:"types,omitempty"`
 }
 
 // ClausePair represents clauses, related to Ricardian Contracts.
@@ -104,6 +120,6 @@ type ClausePair struct {
 }
 
 type ABIErrorMessage struct {
-	Code    uint64 `json:"error_code"`
+	Code    Uint64 `json:"error_code"`
 	Message string `json:"error_msg"`
 }

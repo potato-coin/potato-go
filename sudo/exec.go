@@ -1,22 +1,22 @@
 package sudo
 
 import (
-	eos "github.com/eoscanada/eos-go"
+	potato "github.com/rise-worlds/potato-go"
 )
 
-// NewExec creates an `exec` action, found in the `eosio.wrap`
+// NewExec creates an `exec` action, found in the `poc.wrap`
 // contract.
 //
-// Given an `eos.Transaction`, call `eos.MarshalBinary` on it first,
-// pass the resulting bytes as `eos.HexBytes` here.
-func NewExec(executer eos.AccountName, transaction eos.Transaction) *eos.Action {
-	a := &eos.Action{
-		Account: eos.AccountName("eosio.wrap"),
-		Name:    eos.ActionName("exec"),
-		Authorization: []eos.PermissionLevel{
-			{Actor: executer, Permission: eos.PermissionName("active")},
+// Given an `potato.Transaction`, call `potato.MarshalBinary` on it first,
+// pass the resulting bytes as `potato.HexBytes` here.
+func NewExec(executer potato.AccountName, transaction potato.Transaction) *potato.Action {
+	a := &potato.Action{
+		Account: potato.AccountName("poc.wrap"),
+		Name:    potato.ActionName("exec"),
+		Authorization: []potato.PermissionLevel{
+			{Actor: executer, Permission: potato.PermissionName("active")},
 		},
-		ActionData: eos.NewActionData(Exec{
+		ActionData: potato.NewActionData(Exec{
 			Executer:    executer,
 			Transaction: transaction,
 		}),
@@ -24,8 +24,8 @@ func NewExec(executer eos.AccountName, transaction eos.Transaction) *eos.Action 
 	return a
 }
 
-// Exec represents the `eosio.system::exec` action.
+// Exec represents the `poc.system::exec` action.
 type Exec struct {
-	Executer    eos.AccountName `json:"executer"`
-	Transaction eos.Transaction `json:"trx"`
+	Executer    potato.AccountName `json:"executer"`
+	Transaction potato.Transaction `json:"trx"`
 }

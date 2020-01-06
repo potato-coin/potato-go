@@ -3,19 +3,19 @@ package p2p
 import (
 	"fmt"
 
-	eos "github.com/eoscanada/eos-go"
+	potato "github.com/rise-worlds/potato-go"
 	"go.uber.org/zap"
 )
 
-// Just Use same patterns to eos-go/logger.go
-// TODO be improved in terms of external package integration for logger by eos-go
+// Just Use same patterns to potato-go/logger.go
+// TODO be improved in terms of external package integration for logger by potato-go
 
 // logger default use nil zap logger
 var p2pLog = zap.NewNop()
 
 // EnableP2PLogging enable p2p package to log by zap
 func EnableP2PLogging() {
-	p2pLog = eos.NewLogger(false)
+	p2pLog = potato.NewLogger(false)
 }
 
 // logErr log err msg by p2pLog

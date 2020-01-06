@@ -1,25 +1,25 @@
 package msig
 
 import (
-	eos "github.com/eoscanada/eos-go"
+	potato "github.com/rise-worlds/potato-go"
 )
 
 // NewPropose returns a `propose` action that lives on the
-// `eosio.msig` contract.
-func NewPropose(proposer eos.AccountName, proposalName eos.Name, requested []eos.PermissionLevel, transaction *eos.Transaction) *eos.Action {
-	return &eos.Action{
-		Account: eos.AccountName("eosio.msig"),
-		Name:    eos.ActionName("propose"),
-		Authorization: []eos.PermissionLevel{
-			{Actor: proposer, Permission: eos.PermissionName("active")},
+// `poc.msig` contract.
+func NewPropose(proposer potato.AccountName, proposalName potato.Name, requested []potato.PermissionLevel, transaction *potato.Transaction) *potato.Action {
+	return &potato.Action{
+		Account: potato.AccountName("poc.msig"),
+		Name:    potato.ActionName("propose"),
+		Authorization: []potato.PermissionLevel{
+			{Actor: proposer, Permission: potato.PermissionName("active")},
 		},
-		ActionData: eos.NewActionData(Propose{proposer, proposalName, requested, transaction}),
+		ActionData: potato.NewActionData(Propose{proposer, proposalName, requested, transaction}),
 	}
 }
 
 type Propose struct {
-	Proposer     eos.AccountName       `json:"proposer"`
-	ProposalName eos.Name              `json:"proposal_name"`
-	Requested    []eos.PermissionLevel `json:"requested"`
-	Transaction  *eos.Transaction      `json:"trx"`
+	Proposer     potato.AccountName       `json:"proposer"`
+	ProposalName potato.Name              `json:"proposal_name"`
+	Requested    []potato.PermissionLevel `json:"requested"`
+	Transaction  *potato.Transaction      `json:"trx"`
 }

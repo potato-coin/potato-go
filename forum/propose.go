@@ -1,18 +1,18 @@
 package forum
 
 import (
-	eos "github.com/eoscanada/eos-go"
+	potato "github.com/rise-worlds/potato-go"
 )
 
 // NewPropose is an action to submit a proposal for vote.
-func NewPropose(proposer eos.AccountName, proposalName eos.Name, title string, proposalJSON string, expiresAt eos.JSONTime) *eos.Action {
-	a := &eos.Action{
+func NewPropose(proposer potato.AccountName, proposalName potato.Name, title string, proposalJSON string, expiresAt potato.JSONTime) *potato.Action {
+	a := &potato.Action{
 		Account: ForumAN,
 		Name:    ActN("propose"),
-		Authorization: []eos.PermissionLevel{
-			{Actor: proposer, Permission: eos.PermissionName("active")},
+		Authorization: []potato.PermissionLevel{
+			{Actor: proposer, Permission: potato.PermissionName("active")},
 		},
-		ActionData: eos.NewActionData(Propose{
+		ActionData: potato.NewActionData(Propose{
 			Proposer:     proposer,
 			ProposalName: proposalName,
 			Title:        title,
@@ -23,11 +23,11 @@ func NewPropose(proposer eos.AccountName, proposalName eos.Name, title string, p
 	return a
 }
 
-// Propose represents the `eosio.forum::propose` action.
+// Propose represents the `poc.forum::propose` action.
 type Propose struct {
-	Proposer     eos.AccountName `json:"proposer"`
-	ProposalName eos.Name        `json:"proposal_name"`
+	Proposer     potato.AccountName `json:"proposer"`
+	ProposalName potato.Name        `json:"proposal_name"`
 	Title        string          `json:"title"`
 	ProposalJSON string          `json:"proposal_json"`
-	ExpiresAt    eos.JSONTime    `json:"expires_at"`
+	ExpiresAt    potato.JSONTime    `json:"expires_at"`
 }

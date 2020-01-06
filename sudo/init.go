@@ -1,10 +1,10 @@
 package sudo
 
-import eos "github.com/eoscanada/eos-go"
+import potato "github.com/rise-worlds/potato-go"
 
 func init() {
-	eos.RegisterAction(AN("eosio.wrap"), ActN("exec"), Exec{})
+	potato.RegisterAction(AN("poc.wrap"), ActN("exec"), Exec{})
 }
 
-var AN = eos.AN
-var ActN = eos.ActN
+var AN = potato.AN
+var ActN = potato.ActN

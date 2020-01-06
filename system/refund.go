@@ -1,25 +1,25 @@
 package system
 
 import (
-	eos "github.com/eoscanada/eos-go"
+	potato "github.com/rise-worlds/potato-go"
 )
 
 // NewRefund returns a `refund` action that lives on the
-// `eosio.system` contract.
-func NewRefund(owner eos.AccountName) *eos.Action {
-	return &eos.Action{
-		Account: AN("eosio"),
+// `poc.system` contract.
+func NewRefund(owner potato.AccountName) *potato.Action {
+	return &potato.Action{
+		Account: AN("potato"),
 		Name:    ActN("refund"),
-		Authorization: []eos.PermissionLevel{
+		Authorization: []potato.PermissionLevel{
 			{Actor: owner, Permission: PN("active")},
 		},
-		ActionData: eos.NewActionData(Refund{
+		ActionData: potato.NewActionData(Refund{
 			Owner: owner,
 		}),
 	}
 }
 
-// Refund represents the `eosio.system::refund` action
+// Refund represents the `poc.system::refund` action
 type Refund struct {
-	Owner eos.AccountName `json:"owner"`
+	Owner potato.AccountName `json:"owner"`
 }

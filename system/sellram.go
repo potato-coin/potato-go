@@ -1,19 +1,19 @@
 package system
 
 import (
-	eos "github.com/eoscanada/eos-go"
+	potato "github.com/rise-worlds/potato-go"
 )
 
 // NewSellRAM will sell at current market price a given number of
 // bytes of RAM.
-func NewSellRAM(account eos.AccountName, bytes uint64) *eos.Action {
-	a := &eos.Action{
-		Account: AN("eosio"),
+func NewSellRAM(account potato.AccountName, bytes uint64) *potato.Action {
+	a := &potato.Action{
+		Account: AN("potato"),
 		Name:    ActN("sellram"),
-		Authorization: []eos.PermissionLevel{
-			{Actor: account, Permission: eos.PermissionName("active")},
+		Authorization: []potato.PermissionLevel{
+			{Actor: account, Permission: potato.PermissionName("active")},
 		},
-		ActionData: eos.NewActionData(SellRAM{
+		ActionData: potato.NewActionData(SellRAM{
 			Account: account,
 			Bytes:   bytes,
 		}),
@@ -21,8 +21,8 @@ func NewSellRAM(account eos.AccountName, bytes uint64) *eos.Action {
 	return a
 }
 
-// SellRAM represents the `eosio.system::sellram` action.
+// SellRAM represents the `poc.system::sellram` action.
 type SellRAM struct {
-	Account eos.AccountName `json:"account"`
+	Account potato.AccountName `json:"account"`
 	Bytes   uint64          `json:"bytes"`
 }

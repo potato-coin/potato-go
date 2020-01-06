@@ -1,8 +1,8 @@
 package bnet
 
 import (
-	eos "github.com/eoscanada/eos-go"
-	"github.com/eoscanada/eos-go/ecc"
+	potato "github.com/rise-worlds/potato-go"
+	"github.com/rise-worlds/potato-go/ecc"
 )
 
 type BNetMessageType byte
@@ -28,10 +28,10 @@ type Hello struct {
 	Password                 string            `json:"password"`
 	Agent                    string            `json:"agent"`
 	ProtocolVersion          string            `json:"protocol_version"`
-	ChainID                  eos.Checksum256   `json:"chain_id"`
-	RequestTransactions      eos.Bool          `json:"request_transactions"`
+	ChainID                  potato.Checksum256   `json:"chain_id"`
+	RequestTransactions      potato.Bool          `json:"request_transactions"`
 	LastIrreversibleBlockNum uint32            `json:"last_irr_block_num"`
-	PendingBlockIDs          []eos.Checksum256 `json:"pending_block_ids"`
+	PendingBlockIDs          []potato.Checksum256 `json:"pending_block_ids"`
 }
 
 /**
@@ -41,7 +41,7 @@ type Hello struct {
  * and informs a peer not to send this message.
  */
 type TransactionNotice struct {
-	SignedTransactionIDs []eos.Checksum256 ///< hash of trx + sigs
+	SignedTransactionIDs []potato.Checksum256 ///< hash of trx + sigs
 }
 
 /**
@@ -51,20 +51,20 @@ type TransactionNotice struct {
  * and informs the remote peer that there is no need to send this block.
  */
 type BlockNotice struct {
-	BlockIDs []eos.Checksum256 `json:"block_ids"`
+	BlockIDs []potato.Checksum256 `json:"block_ids"`
 }
 
 type Ping struct {
-	Sent                  eos.Tstamp      `json:"sent"`
-	Code                  eos.Checksum256 `json:"code"`
+	Sent                  potato.Tstamp      `json:"sent"`
+	Code                  potato.Checksum256 `json:"code"`
 	LastIrreversibleBlock uint32          `json:"lib"` /// last irreversible block
 }
 
 type Pong struct {
-	Sent eos.Tstamp      `json:"sent"`
-	Code eos.Checksum256 `json:"code"`
+	Sent potato.Tstamp      `json:"sent"`
+	Code potato.Checksum256 `json:"code"`
 }
 
-// Also use `eos.SignedBlock`
-// Also use `eos.SignedTransaction`
-var SignedBlock = eos.SignedTransaction{}
+// Also use `potato.SignedBlock`
+// Also use `potato.SignedTransaction`
+var SignedBlock = potato.SignedTransaction{}

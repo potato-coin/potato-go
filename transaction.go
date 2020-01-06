@@ -1,4 +1,4 @@
-package eos
+package potato
 
 import (
 	"bytes"
@@ -6,8 +6,11 @@ import (
 	"compress/zlib"
 	"crypto/sha256"
 	"encoding/binary"
+	"encoding/hex"
 	"errors"
 	"fmt"
+	"math"
+	"reflect"
 	"time"
 
 	"io"
@@ -16,7 +19,7 @@ import (
 
 	"io/ioutil"
 
-	"github.com/eoscanada/eos-go/ecc"
+	"github.com/rise-worlds/potato-go/ecc"
 )
 
 type TransactionHeader struct {
@@ -53,8 +56,56 @@ func (tx *Transaction) SetExpiration(in time.Duration) {
 }
 
 type Extension struct {
-	Type uint16   `json:"type"`
-	Data HexBytes `json:"data"`
+	Type uint16
+	Data HexBytes
+}
+
+func (e *Extension) MarshalJSON() ([]byte, error) {
+	pair := make([]interface{}, 2)
+	pair[0] = e.Type
+	pair[1] = e.Data
+
+	return json.Marshal(&pair)
+}
+
+func (e *Extension) UnmarshalJSON(data []byte) error {
+	var pair []interface{}
+	err := json.Unmarshal(data, &pair)
+	if err != nil {
+		return err
+	}
+
+	typeFloat, ok := pair[0].(float64)
+	if !ok {
+		return unmarshalTypeError(pair[0], typeFloat, e, "Type")
+	}
+
+	if typeFloat < 0 || typeFloat > math.MaxUint16 {
+		return unmarshalTypeError(pair[0], e.Type, e, "Type")
+	}
+
+	e.Type = uint16(typeFloat)
+
+	dataHexString, ok := pair[1].(string)
+	if !ok {
+		return unmarshalTypeError(pair[1], dataHexString, e, "Data")
+	}
+
+	e.Data, err = hex.DecodeString(dataHexString)
+	if err != nil {
+		return unmarshalTypeError(pair[1], e.Data, e, "Data")
+	}
+
+	return nil
+}
+
+func unmarshalTypeError(value interface{}, reflectTypeHost interface{}, target interface{}, field string) *json.UnmarshalTypeError {
+	return &json.UnmarshalTypeError{
+		Value:  fmt.Sprintf("%T", value),
+		Type:   reflect.TypeOf(reflectTypeHost),
+		Struct: fmt.Sprintf("%T", target),
+		Field:  field,
+	}
 }
 
 // Fill sets the fields on a transaction.  If you pass `headBlockID`, then `api` can be nil. If you don't pass `headBlockID`, then the `api` is going to be called to fetch
@@ -81,6 +132,25 @@ func (tx *Transaction) setRefBlock(blockID []byte) {
 	}
 	tx.RefBlockNum = uint16(binary.BigEndian.Uint32(blockID[:4]))
 	tx.RefBlockPrefix = binary.LittleEndian.Uint32(blockID[8:16])
+}
+
+type TransactionTrace struct {
+	ID              Checksum256               `json:"id"`
+	BlockNum        uint32                    `json:"block_num"`
+	BlockTime       BlockTimestamp            `json:"block_time"`
+	ProducerBlockID Checksum256               `json:"producer_block_id"`
+	Receipt         *TransactionReceiptHeader `json:"receipt,omitempty"`
+	Elapsed         Int64                     `json:"elapsed"`
+	NetUsage        Uint64                    `json:"net_usage"`
+	Scheduled       bool                      `json:"scheduled"`
+	ActionTraces    []ActionTrace             `json:"action_traces"`
+	AccountRamDelta *struct {
+		AccountName AccountName `json:"account_name"`
+		Delta       Int64       `json:"delta"`
+	} `json:"account_ram_delta"`
+	Except          *Except           `json:"except"`
+	ErrorCode       *Uint64           `json:"error_code"`
+	FailedDtrxTrace *TransactionTrace `json:"failed_dtrx_trace"`
 }
 
 type SignedTransaction struct {
@@ -180,6 +250,7 @@ func (s *SignedTransaction) Pack(compression CompressionType) (*PackedTransactio
 		Compression:           compression,
 		PackedContextFreeData: rawcfd,
 		PackedTransaction:     rawtrx,
+		wasPackedLocally:      true,
 	}
 
 	return packed, nil
@@ -193,29 +264,30 @@ type PackedTransaction struct {
 	Compression           CompressionType `json:"compression"` // in C++, it's an enum, not sure how it Binary-marshals..
 	PackedContextFreeData HexBytes        `json:"packed_context_free_data"`
 	PackedTransaction     HexBytes        `json:"packed_trx"`
+
+	wasPackedLocally bool
 }
 
+// ID returns the hash of a transaction.
 func (p *PackedTransaction) ID() (Checksum256, error) {
 	h := sha256.New()
 
-	if p.Compression == CompressionZlib {
-		var err error
-		zReader, err := zlib.NewReader(bytes.NewBuffer(p.PackedTransaction))
-		if err != nil {
-			return nil, fmt.Errorf("getting zlib reader, %v", err)
-		}
-		defer zReader.Close()
-
-		data, err := ioutil.ReadAll(zReader)
-		if err != nil {
-			return nil, fmt.Errorf("reading all data from zlib, %v", err)
-		}
-
-		_, _ = h.Write(data)
+	if p.wasPackedLocally {
+		_, _ = h.Write(p.PackedTransaction)
 		return h.Sum(nil), nil
 	}
 
-	_, _ = h.Write(p.PackedTransaction)
+	signed, err := p.UnpackBare()
+	if err != nil {
+		return nil, err
+	}
+
+	repacked, err := signed.Pack(CompressionNone)
+	if err != nil {
+		return nil, err
+	}
+
+	_, _ = h.Write(repacked.PackedTransaction)
 	return h.Sum(nil), nil
 }
 

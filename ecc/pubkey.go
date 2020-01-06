@@ -6,15 +6,15 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/eoscanada/eos-go/btcsuite/btcd/btcec"
-	"github.com/eoscanada/eos-go/btcsuite/btcutil/base58"
+	"github.com/rise-worlds/potato-go/btcsuite/btcd/btcec"
+	"github.com/rise-worlds/potato-go/btcsuite/btcutil/base58"
 	"golang.org/x/crypto/ripemd160"
 )
 
 const PublicKeyPrefix = "PUB_"
 const PublicKeyK1Prefix = "PUB_K1_"
 const PublicKeyR1Prefix = "PUB_R1_"
-const PublicKeyPrefixCompat = "EOS"
+const PublicKeyPrefixCompat = "POC"
 
 type innerPublicKey interface {
 	key(content []byte) (*btcec.PublicKey, error)
@@ -83,8 +83,8 @@ func NewPublicKey(pubKey string) (out PublicKey, err error) {
 			return out, fmt.Errorf("checkDecode: %s", err)
 		}
 		inner = &innerK1PublicKey{}
-	} else if strings.HasPrefix(pubKey, PublicKeyPrefixCompat) { // "EOS"
-		pubKeyMaterial := pubKey[len(PublicKeyPrefixCompat):] // strip "EOS"
+	} else if strings.HasPrefix(pubKey, PublicKeyPrefixCompat) { // "POC"
+		pubKeyMaterial := pubKey[len(PublicKeyPrefixCompat):] // strip "POC"
 		curveID = CurveK1
 		decodedPubKey, err = checkDecode(pubKeyMaterial, curveID)
 		if err != nil {
@@ -120,7 +120,7 @@ func checkDecode(input string, curve CurveID) (result []byte, err error) {
 	if bytes.Compare(ripemd160checksum(decoded[:len(decoded)-4], curve), cksum[:]) != 0 {
 		return nil, fmt.Errorf("invalid checksum")
 	}
-	// perhaps bitcoin has a leading net ID / version, but EOS doesn't
+	// perhaps bitcoin has a leading net ID / version, but POC doesn't
 	payload := decoded[:len(decoded)-4]
 	result = append(result, payload...)
 	return
@@ -143,7 +143,7 @@ func Ripemd160checksumHashCurve(in []byte, curve CurveID) []byte {
 	_, _ = h.Write(in) // this implementation has no error path
 
 	// FIXME: this seems to be only rolled out to the `SIG_` things..
-	// proper support for importing `EOS` keys isn't rolled out into `dawn4`.
+	// proper support for importing `POC` keys isn't rolled out into `dawn4`.
 	_, _ = h.Write([]byte(curve.String())) // conditionally ?
 	sum := h.Sum(nil)
 	return sum[:4]

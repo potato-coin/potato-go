@@ -1,20 +1,20 @@
 package system
 
 import (
-	eos "github.com/eoscanada/eos-go"
-	"github.com/eoscanada/eos-go/ecc"
+	potato "github.com/rise-worlds/potato-go"
+	"github.com/rise-worlds/potato-go/ecc"
 )
 
 // NewRegProducer returns a `regproducer` action that lives on the
-// `eosio.system` contract.
-func NewRegProducer(producer eos.AccountName, producerKey ecc.PublicKey, url string, location uint16) *eos.Action {
-	return &eos.Action{
-		Account: AN("eosio"),
+// `poc.system` contract.
+func NewRegProducer(producer potato.AccountName, producerKey ecc.PublicKey, url string, location uint16) *potato.Action {
+	return &potato.Action{
+		Account: AN("potato"),
 		Name:    ActN("regproducer"),
-		Authorization: []eos.PermissionLevel{
+		Authorization: []potato.PermissionLevel{
 			{Actor: producer, Permission: PN("active")},
 		},
-		ActionData: eos.NewActionData(RegProducer{
+		ActionData: potato.NewActionData(RegProducer{
 			Producer:    producer,
 			ProducerKey: producerKey,
 			URL:         url,
@@ -23,9 +23,9 @@ func NewRegProducer(producer eos.AccountName, producerKey ecc.PublicKey, url str
 	}
 }
 
-// RegProducer represents the `eosio.system::regproducer` action
+// RegProducer represents the `poc.system::regproducer` action
 type RegProducer struct {
-	Producer    eos.AccountName `json:"producer"`
+	Producer    potato.AccountName `json:"producer"`
 	ProducerKey ecc.PublicKey   `json:"producer_key"`
 	URL         string          `json:"url"`
 	Location    uint16          `json:"location"` // what,s the meaning of that anyway ?

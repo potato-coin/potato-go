@@ -1,19 +1,19 @@
 package system
 
 import (
-	eos "github.com/eoscanada/eos-go"
+	potato "github.com/rise-worlds/potato-go"
 )
 
-// NewUndelegateBW returns a `undelegatebw` action that lives on the
-// `eosio.system` contract.
-func NewUndelegateBW(from, receiver eos.AccountName, unstakeCPU, unstakeNet eos.Asset) *eos.Action {
-	return &eos.Action{
-		Account: AN("eosio"),
+// UnDelegateBW returns a `undelegatebw` action that lives on the
+// `poc.system` contract.
+func NewUnDelegateBW(from, receiver potato.AccountName, unstakeCPU, unstakeNet potato.Asset) *potato.Action {
+	return &potato.Action{
+		Account: AN("potato"),
 		Name:    ActN("undelegatebw"),
-		Authorization: []eos.PermissionLevel{
+		Authorization: []potato.PermissionLevel{
 			{Actor: from, Permission: PN("active")},
 		},
-		ActionData: eos.NewActionData(UndelegateBW{
+		ActionData: potato.NewActionData(UnDelegateBW{
 			From:     from,
 			Receiver: receiver,
 			UnstakeNet: unstakeNet,
@@ -22,10 +22,10 @@ func NewUndelegateBW(from, receiver eos.AccountName, unstakeCPU, unstakeNet eos.
 	}
 }
 
-// UndelegateBW represents the `eosio.system::undelegatebw` action.
-type UndelegateBW struct {
-	From         eos.AccountName `json:"from"`
-	Receiver     eos.AccountName `json:"receiver"`
-	UnstakeNet   eos.Asset       `json:"unstake_net_quantity"`
-	UnstakeCPU   eos.Asset       `json:"unstake_cpu_quantity"`
+// UnDelegateBW represents the `poc.system::undelegatebw` action.
+type UnDelegateBW struct {
+	From         potato.AccountName `json:"from"`
+	Receiver     potato.AccountName `json:"receiver"`
+	UnstakeNet   potato.Asset       `json:"unstake_net_quantity"`
+	UnstakeCPU   potato.Asset       `json:"unstake_cpu_quantity"`
 }

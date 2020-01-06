@@ -1,17 +1,17 @@
 package msig
 
 import (
-	"github.com/eoscanada/eos-go"
+	"github.com/rise-worlds/potato-go"
 )
 
 func init() {
-	eos.RegisterAction(AN("eosio.msig"), ActN("propose"), &Propose{})
-	eos.RegisterAction(AN("eosio.msig"), ActN("approve"), &Approve{})
-	eos.RegisterAction(AN("eosio.msig"), ActN("unapprove"), &Unapprove{})
-	eos.RegisterAction(AN("eosio.msig"), ActN("cancel"), &Cancel{})
-	eos.RegisterAction(AN("eosio.msig"), ActN("exec"), &Exec{})
+	potato.RegisterAction(AN("poc.msig"), ActN("propose"), &Propose{})
+	potato.RegisterAction(AN("poc.msig"), ActN("approve"), &Approve{})
+	potato.RegisterAction(AN("poc.msig"), ActN("unapprove"), &Unapprove{})
+	potato.RegisterAction(AN("poc.msig"), ActN("cancel"), &Cancel{})
+	potato.RegisterAction(AN("poc.msig"), ActN("exec"), &Exec{})
 }
 
-var AN = eos.AN
-var PN = eos.PN
-var ActN = eos.ActN
+var AN = potato.AN
+var PN = potato.PN
+var ActN = potato.ActN

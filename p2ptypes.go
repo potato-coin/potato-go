@@ -1,4 +1,4 @@
-package eos
+package potato
 
 import (
 	"crypto/sha256"
@@ -8,7 +8,7 @@ import (
 	"encoding/hex"
 	"encoding/json"
 
-	"github.com/eoscanada/eos-go/ecc"
+	"github.com/rise-worlds/potato-go/ecc"
 )
 
 type P2PMessage interface {
@@ -212,6 +212,36 @@ type ProducerSchedule struct {
 	Producers []ProducerKey `json:"producers"`
 }
 
+type MerkleRoot struct {
+	ActiveNodes []string `json:"_active_nodes"`
+	NodeCount   uint32   `json:"_node_count"`
+}
+
+type POCNameOrUint32 interface{}
+
+type BlockState struct {
+	BlockID                          string                `json:"id"`
+	BlockNum                         uint32                `json:"block_num"`
+	DPoSProposedIrreversibleBlockNum uint32                `json:"dpos_proposed_irreversible_blocknum"`
+	DPoSIrreversibleBlockNum         uint32                `json:"dpos_irreversible_blocknum"`
+	ActiveSchedule                   *ProducerSchedule     `json:"active_schedule"`
+	BlockrootMerkle                  *MerkleRoot           `json:"blockroot_merkle"`
+	ProducerToLastProduced           [][2]POCNameOrUint32  `json:"producer_to_last_produced"`
+	ProducerToLastImpliedIRB         [][2]POCNameOrUint32  `json:"producer_to_last_implied_irb"`
+	BlockSigningKey                  ecc.PublicKey         `json:"block_signing_key"`
+	ConfirmCount                     []uint32              `json:"confirm_count"`
+	PendingSchedule                  *PendingSchedule      `json:"pending_schedule"`
+	ActivatedProtocolFeatures        map[string][]HexBytes `json:"activated_protocol_features"`
+	SignedBlock                      *SignedBlock          `json:"block"`
+	Validated                        bool                  `json:"validated"`
+}
+
+type PendingSchedule struct {
+	ScheduleLIBNum uint32            `json:"schedule_lib_num"`
+	ScheduleHash   HexBytes          `json:"schedule_hash"`
+	Schedule       *ProducerSchedule `json:"schedule"`
+}
+
 type BlockHeader struct {
 	Timestamp        BlockTimestamp            `json:"timestamp"`
 	Producer         AccountName               `json:"producer"`
@@ -220,7 +250,7 @@ type BlockHeader struct {
 	TransactionMRoot Checksum256               `json:"transaction_mroot"`
 	ActionMRoot      Checksum256               `json:"action_mroot"`
 	ScheduleVersion  uint32                    `json:"schedule_version"`
-	NewProducers     *OptionalProducerSchedule `json:"new_producers" eos:"optional"`
+	NewProducers     *OptionalProducerSchedule `json:"new_producers" potato:"optional"`
 	HeaderExtensions []*Extension              `json:"header_extensions"`
 }
 

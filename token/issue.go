@@ -1,15 +1,15 @@
 package token
 
-import eos "github.com/eoscanada/eos-go"
+import potato "github.com/rise-worlds/potato-go"
 
-func NewIssue(to eos.AccountName, quantity eos.Asset, memo string) *eos.Action {
-	return &eos.Action{
-		Account: AN("eosio.token"),
+func NewIssue(to potato.AccountName, quantity potato.Asset, memo string) *potato.Action {
+	return &potato.Action{
+		Account: AN("poc.token"),
 		Name:    ActN("issue"),
-		Authorization: []eos.PermissionLevel{
-			{Actor: AN("eosio"), Permission: PN("active")},
+		Authorization: []potato.PermissionLevel{
+			{Actor: AN("potato"), Permission: PN("active")},
 		},
-		ActionData: eos.NewActionData(Issue{
+		ActionData: potato.NewActionData(Issue{
 			To:       to,
 			Quantity: quantity,
 			Memo:     memo,
@@ -17,9 +17,9 @@ func NewIssue(to eos.AccountName, quantity eos.Asset, memo string) *eos.Action {
 	}
 }
 
-// Issue represents the `issue` struct on the `eosio.token` contract.
+// Issue represents the `issue` struct on the `poc.token` contract.
 type Issue struct {
-	To       eos.AccountName `json:"to"`
-	Quantity eos.Asset       `json:"quantity"`
+	To       potato.AccountName `json:"to"`
+	Quantity potato.Asset       `json:"quantity"`
 	Memo     string          `json:"memo"`
 }

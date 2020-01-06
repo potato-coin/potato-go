@@ -1,19 +1,19 @@
 package system
 
-import "github.com/eoscanada/eos-go"
+import "github.com/rise-worlds/potato-go"
 
 // NewNonce returns a `nonce` action that lives on the
-// `eosio.bios` contract. It should exist only when booting a new
-// network, as it is replaced using the `eos-bios` boot process by the
-// `eosio.system` contract.
-func NewNonce(nonce string) *eos.Action {
-	a := &eos.Action{
-		Account:       AN("eosio"),
+// `poc.bios` contract. It should exist only when booting a new
+// network, as it is replaced using the `potato-bios` boot process by the
+// `poc.system` contract.
+func NewNonce(nonce string) *potato.Action {
+	a := &potato.Action{
+		Account:       AN("potato"),
 		Name:          ActN("nonce"),
-		Authorization: []eos.PermissionLevel{
-			//{Actor: AN("eosio"), Permission: PN("active")},
+		Authorization: []potato.PermissionLevel{
+			//{Actor: AN("potato"), Permission: PN("active")},
 		},
-		ActionData: eos.NewActionData(Nonce{
+		ActionData: potato.NewActionData(Nonce{
 			Value: nonce,
 		}),
 	}

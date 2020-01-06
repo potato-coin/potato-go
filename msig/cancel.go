@@ -1,25 +1,25 @@
 package msig
 
 import (
-	eos "github.com/eoscanada/eos-go"
+	potato "github.com/rise-worlds/potato-go"
 )
 
 // NewCancel returns a `cancel` action that lives on the
-// `eosio.msig` contract.
-func NewCancel(proposer eos.AccountName, proposalName eos.Name, canceler eos.AccountName) *eos.Action {
-	return &eos.Action{
-		Account: eos.AccountName("eosio.msig"),
-		Name:    eos.ActionName("cancel"),
+// `poc.msig` contract.
+func NewCancel(proposer potato.AccountName, proposalName potato.Name, canceler potato.AccountName) *potato.Action {
+	return &potato.Action{
+		Account: potato.AccountName("poc.msig"),
+		Name:    potato.ActionName("cancel"),
 		// TODO: double check in this package that the `Actor` is always the `proposer`..
-		Authorization: []eos.PermissionLevel{
-			{Actor: canceler, Permission: eos.PermissionName("active")},
+		Authorization: []potato.PermissionLevel{
+			{Actor: canceler, Permission: potato.PermissionName("active")},
 		},
-		ActionData: eos.NewActionData(Cancel{proposer, proposalName, canceler}),
+		ActionData: potato.NewActionData(Cancel{proposer, proposalName, canceler}),
 	}
 }
 
 type Cancel struct {
-	Proposer     eos.AccountName `json:"proposer"`
-	ProposalName eos.Name        `json:"proposal_name"`
-	Canceler     eos.AccountName `json:"canceler"`
+	Proposer     potato.AccountName `json:"proposer"`
+	ProposalName potato.Name        `json:"proposal_name"`
+	Canceler     potato.AccountName `json:"canceler"`
 }
